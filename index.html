@@ -1115,8 +1115,25 @@
       }
     }
 
-    // ── 시작 ──
-    init();
+   // ── 초기화 ──
+async function init() {
+  currentUser = await checkAuth();
+  if (!currentUser) return;
+
+  const cfg = getUserConfig(currentUser.email);
+  document.getElementById('userDot').style.background = cfg.color;
+  document.getElementById('userName').textContent = cfg.name;
+
+  const container = document.getElementById('map');
+  map = new kakao.maps.Map(container, {
+    center: new kakao.maps.LatLng(37.5665, 126.9780),
+    level: 7
+  });
+  loadPlaces();
+}
+
+// ── 시작 ──
+init();
   </script>
 </body>
 </html>
