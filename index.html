@@ -219,7 +219,6 @@
   </div>
 
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-  <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=f7da18f5467c98e0e45cdd5bd535596d&libraries=services&autoload=false"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
   <script>
@@ -234,6 +233,18 @@
     let openInfoWindow = null;
     let currentDetailPlace = null;
 
+    // 카카오 지도 SDK를 동적으로 로드
+    function loadKakaoMap() {
+      return new Promise((resolve) => {
+        const script = document.createElement('script');
+        script.src = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey=f7da18f5467c98e0e45cdd5bd535596d&libraries=services&autoload=false';
+        script.onload = () => {
+          kakao.maps.load(() => resolve());
+        };
+        document.head.appendChild(script);
+      });
+    }
+
     async function init() {
       currentUser = await checkAuth();
       if (!currentUser) return;
@@ -242,14 +253,14 @@
       document.getElementById('userDot').style.background = cfg.color;
       document.getElementById('userName').textContent = cfg.name;
 
-      kakao.maps.load(() => {
-        const container = document.getElementById('map');
-        map = new kakao.maps.Map(container, {
-          center: new kakao.maps.LatLng(37.5665, 126.9780),
-          level: 7
-        });
-        loadPlaces();
+      await loadKakaoMap();
+
+      const container = document.getElementById('map');
+      map = new kakao.maps.Map(container, {
+        center: new kakao.maps.LatLng(37.5665, 126.9780),
+        level: 7
       });
+      loadPlaces();
     }
 
     async function loadPlaces() {
