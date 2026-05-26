@@ -8,622 +8,99 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     :root {
-      --green: #a8d5a2;
-      --purple: #c3a8e0;
-      --green-dark: #6dbf67;
-      --purple-dark: #a97dd4;
-      --bg: #f5f5f0;
-      --white: #ffffff;
-      --text: #333333;
-      --text-light: #888888;
-      --border: #e8e8e8;
-      --radius: 16px;
-      --shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --green: #a8d5a2; --purple: #c3a8e0;
+      --green-dark: #6dbf67; --purple-dark: #a97dd4;
+      --bg: #f5f5f0; --white: #ffffff; --text: #333333;
+      --text-light: #888888; --border: #e8e8e8;
+      --radius: 16px; --shadow: 0 4px 20px rgba(0,0,0,0.08);
     }
-
-    body {
-      font-family: 'Noto Sans KR', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    /* ── 상단 헤더 ── */
-    .header {
-      background: white;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      z-index: 100;
-      flex-shrink: 0;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .header h1 {
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .user-badge {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    .user-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .btn-icon {
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      padding: 6px;
-      border-radius: 8px;
-      transition: background 0.15s;
-    }
+    body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+    .header { background: white; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.06); z-index: 100; flex-shrink: 0; }
+    .header-left { display: flex; align-items: center; gap: 8px; }
+    .header h1 { font-size: 18px; font-weight: 700; }
+    .user-badge { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+    .user-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    .btn-icon { background: none; border: none; font-size: 20px; cursor: pointer; padding: 6px; border-radius: 8px; transition: background 0.15s; }
     .btn-icon:hover { background: #f0f0f0; }
-
-    /* ── 탭 (테마 필터) ── */
-    .tabs {
-      background: white;
-      display: flex;
-      padding: 0 12px;
-      gap: 4px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
+    .tabs { background: white; display: flex; padding: 0 12px; gap: 4px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .tabs::-webkit-scrollbar { display: none; }
-
-    .tab {
-      flex-shrink: 0;
-      padding: 10px 14px;
-      border: none;
-      background: none;
-      font-size: 13px;
-      font-family: 'Noto Sans KR', sans-serif;
-      font-weight: 500;
-      color: var(--text-light);
-      cursor: pointer;
-      border-bottom: 2.5px solid transparent;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-
-    .tab.active {
-      color: var(--text);
-      border-bottom-color: #a8d5a2;
-    }
-
-    /* ── 뷰 전환 버튼 ── */
-    .view-toggle {
-      display: flex;
-      background: white;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-
-    .view-btn {
-      flex: 1;
-      padding: 8px;
-      border: none;
-      background: none;
-      font-size: 13px;
-      font-family: 'Noto Sans KR', sans-serif;
-      color: var(--text-light);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      transition: all 0.15s;
-    }
-
-    .view-btn.active {
-      color: var(--text);
-      font-weight: 600;
-      background: #f9fdf9;
-    }
-
-    /* ── 메인 콘텐츠 영역 ── */
-    .content {
-      flex: 1;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* ── 지도 ── */
-    #map {
-      width: 100%;
-      height: 100%;
-    }
-
-    /* ── 목록 뷰 ── */
-    .list-view {
-      height: 100%;
-      overflow-y: auto;
-      padding: 12px;
-      display: none;
-      flex-direction: column;
-      gap: 10px;
-    }
-
+    .tab { flex-shrink: 0; padding: 10px 14px; border: none; background: none; font-size: 13px; font-family: 'Noto Sans KR', sans-serif; font-weight: 500; color: var(--text-light); cursor: pointer; border-bottom: 2.5px solid transparent; transition: all 0.15s; white-space: nowrap; }
+    .tab.active { color: var(--text); border-bottom-color: #a8d5a2; }
+    .view-toggle { display: flex; background: white; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .view-btn { flex: 1; padding: 8px; border: none; background: none; font-size: 13px; font-family: 'Noto Sans KR', sans-serif; color: var(--text-light); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.15s; }
+    .view-btn.active { color: var(--text); font-weight: 600; background: #f9fdf9; }
+    .content { flex: 1; overflow: hidden; position: relative; }
+    #map { width: 100%; height: 100%; }
+    .list-view { height: 100%; overflow-y: auto; padding: 12px; display: none; flex-direction: column; gap: 10px; }
     .list-view.show { display: flex; }
-
-    /* 지역 필터 */
-    .region-filter {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      padding-bottom: 4px;
-      flex-shrink: 0;
-    }
+    .region-filter { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; flex-shrink: 0; }
     .region-filter::-webkit-scrollbar { display: none; }
-
-    .region-chip {
-      flex-shrink: 0;
-      padding: 6px 12px;
-      border-radius: 20px;
-      border: 1.5px solid var(--border);
-      background: white;
-      font-size: 12px;
-      font-family: 'Noto Sans KR', sans-serif;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .region-chip.active {
-      border-color: #a8d5a2;
-      background: #a8d5a2;
-      color: white;
-      font-weight: 600;
-    }
-
-    /* 장소 카드 */
-    .place-card {
-      background: white;
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      box-shadow: var(--shadow);
-      cursor: pointer;
-      transition: transform 0.15s;
-      position: relative;
-    }
-
+    .region-chip { flex-shrink: 0; padding: 6px 12px; border-radius: 20px; border: 1.5px solid var(--border); background: white; font-size: 12px; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; transition: all 0.15s; }
+    .region-chip.active { border-color: #a8d5a2; background: #a8d5a2; color: white; font-weight: 600; }
+    .place-card { background: white; border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); cursor: pointer; transition: transform 0.15s; }
     .place-card:active { transform: scale(0.98); }
-
-    .card-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
-
-    .card-title {
-      font-size: 16px;
-      font-weight: 700;
-      flex: 1;
-    }
-
-    .card-theme-badge {
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 10px;
-      color: white;
-      font-weight: 600;
-      flex-shrink: 0;
-      margin-left: 8px;
-    }
-
-    .card-address {
-      font-size: 13px;
-      color: var(--text-light);
-      margin-bottom: 6px;
-    }
-
-    .card-meta {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .card-region {
-      font-size: 12px;
-      background: #f5f5f5;
-      padding: 2px 8px;
-      border-radius: 10px;
-      color: #666;
-    }
-
-    .card-stars {
-      font-size: 13px;
-      color: #FFB74D;
-    }
-
-    .card-user {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 12px;
-      color: var(--text-light);
-    }
-
-    .card-user-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-
-    .card-review {
-      font-size: 13px;
-      color: #666;
-      margin-top: 6px;
-      line-height: 1.5;
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-    }
-
-    /* ── FAB (장소 추가 버튼) ── */
-    .fab {
-      position: fixed;
-      bottom: 24px;
-      right: 20px;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #a8d5a2, #c3a8e0);
-      border: none;
-      color: white;
-      font-size: 26px;
-      cursor: pointer;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-      z-index: 200;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.15s;
-    }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+    .card-title { font-size: 16px; font-weight: 700; flex: 1; }
+    .card-theme-badge { font-size: 11px; padding: 3px 8px; border-radius: 10px; color: white; font-weight: 600; flex-shrink: 0; margin-left: 8px; }
+    .card-address { font-size: 13px; color: var(--text-light); margin-bottom: 6px; }
+    .card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .card-region { font-size: 12px; background: #f5f5f5; padding: 2px 8px; border-radius: 10px; color: #666; }
+    .card-stars { font-size: 13px; color: #FFB74D; }
+    .card-user { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-light); }
+    .card-user-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .card-review { font-size: 13px; color: #666; margin-top: 6px; line-height: 1.5; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .fab { position: fixed; bottom: 24px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #a8d5a2, #c3a8e0); border: none; color: white; font-size: 26px; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.18); z-index: 200; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; }
     .fab:active { transform: scale(0.93); }
-
-    /* ── 모달 ── */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.45);
-      z-index: 300;
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-    }
-
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 300; display: none; align-items: flex-end; justify-content: center; }
     .modal-overlay.show { display: flex; }
-
-    .modal {
-      background: white;
-      border-radius: 24px 24px 0 0;
-      padding: 24px 20px 40px;
-      width: 100%;
-      max-width: 600px;
-      max-height: 92dvh;
-      overflow-y: auto;
-      animation: slideUp 0.25s ease;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-
-    .modal-handle {
-      width: 40px;
-      height: 4px;
-      background: #e0e0e0;
-      border-radius: 2px;
-      margin: 0 auto 20px;
-    }
-
-    .modal-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 20px;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: #555;
-      margin-bottom: 6px;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      font-size: 15px;
-      font-family: 'Noto Sans KR', sans-serif;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
+    .modal { background: white; border-radius: 24px 24px 0 0; padding: 24px 20px 40px; width: 100%; max-width: 600px; max-height: 92dvh; overflow-y: auto; animation: slideUp 0.25s ease; }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .modal-handle { width: 40px; height: 4px; background: #e0e0e0; border-radius: 2px; margin: 0 auto 20px; }
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 15px; font-family: 'Noto Sans KR', sans-serif; outline: none; transition: border-color 0.2s; }
     .form-input:focus { border-color: #a8d5a2; }
-
-    .form-select {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      font-size: 15px;
-      font-family: 'Noto Sans KR', sans-serif;
-      outline: none;
-      background: white;
-      appearance: none;
-      -webkit-appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-    }
-
-    .theme-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .theme-option {
-      padding: 12px;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.15s;
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    .theme-option.selected {
-      border-color: #a8d5a2;
-      background: #f0faf0;
-    }
-
-    .star-input {
-      display: flex;
-      gap: 6px;
-    }
-
-    .star-btn {
-      font-size: 28px;
-      cursor: pointer;
-      background: none;
-      border: none;
-      line-height: 1;
-      transition: transform 0.1s;
-      color: #ddd;
-    }
-
+    .form-select { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 15px; font-family: 'Noto Sans KR', sans-serif; outline: none; background: white; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+    .theme-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .theme-option { padding: 12px; border: 2px solid var(--border); border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.15s; font-size: 13px; font-weight: 500; }
+    .theme-option.selected { border-color: #a8d5a2; background: #f0faf0; }
+    .star-input { display: flex; gap: 6px; }
+    .star-btn { font-size: 28px; cursor: pointer; background: none; border: none; line-height: 1; transition: transform 0.1s; color: #ddd; }
     .star-btn.active { color: #FFB74D; }
     .star-btn:hover { transform: scale(1.15); }
-
-    .addr-search-row {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn-addr-search {
-      flex-shrink: 0;
-      padding: 12px 14px;
-      background: #f0faf0;
-      border: 1.5px solid #a8d5a2;
-      border-radius: 12px;
-      color: #4a9e44;
-      font-size: 13px;
-      font-weight: 600;
-      font-family: 'Noto Sans KR', sans-serif;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 24px;
-    }
-
-    .btn-cancel {
-      flex: 1;
-      padding: 14px;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      background: white;
-      font-size: 15px;
-      font-family: 'Noto Sans KR', sans-serif;
-      cursor: pointer;
-    }
-
-    .btn-save {
-      flex: 2;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #a8d5a2, #c3a8e0);
-      color: white;
-      font-size: 15px;
-      font-weight: 700;
-      font-family: 'Noto Sans KR', sans-serif;
-      cursor: pointer;
-    }
-
-    /* 상세보기 모달 */
-    .detail-theme-bar {
-      height: 6px;
-      border-radius: 3px;
-      margin-bottom: 20px;
-    }
-
-    .detail-name {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .detail-address {
-      font-size: 14px;
-      color: var(--text-light);
-      margin-bottom: 12px;
-    }
-
-    .detail-meta {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-
-    .detail-stars {
-      font-size: 20px;
-      color: #FFB74D;
-      margin-bottom: 12px;
-    }
-
-    .detail-review {
-      font-size: 14px;
-      line-height: 1.7;
-      color: #555;
-      background: #f9f9f9;
-      padding: 14px;
-      border-radius: 12px;
-      margin-bottom: 16px;
-    }
-
-    .detail-user {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      color: var(--text-light);
-    }
-
-    .detail-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .btn-delete {
-      flex: 1;
-      padding: 12px;
-      border: 1.5px solid #ffcdd2;
-      border-radius: 12px;
-      background: white;
-      color: #e57373;
-      font-size: 14px;
-      font-family: 'Noto Sans KR', sans-serif;
-      cursor: pointer;
-    }
-
-    .btn-map-go {
-      flex: 2;
-      padding: 12px;
-      border: none;
-      border-radius: 12px;
-      background: #f0faf0;
-      color: #4a9e44;
-      font-size: 14px;
-      font-weight: 600;
-      font-family: 'Noto Sans KR', sans-serif;
-      cursor: pointer;
-    }
-
-    /* 지도 위 커스텀 인포윈도우 */
-    .map-info-popup {
-      background: white;
-      border-radius: 12px;
-      padding: 12px 14px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-      min-width: 180px;
-      max-width: 240px;
-      cursor: pointer;
-    }
-
-    .map-info-popup-name {
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .map-info-popup-theme {
-      font-size: 11px;
-      color: white;
-      padding: 2px 7px;
-      border-radius: 8px;
-      display: inline-block;
-      margin-bottom: 4px;
-    }
-
-    .map-info-popup-addr {
-      font-size: 12px;
-      color: #888;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-light);
-    }
-
+    .addr-search-row { display: flex; gap: 8px; }
+    .btn-addr-search { flex-shrink: 0; padding: 12px 14px; background: #f0faf0; border: 1.5px solid #a8d5a2; border-radius: 12px; color: #4a9e44; font-size: 13px; font-weight: 600; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; white-space: nowrap; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+    .btn-cancel { flex: 1; padding: 14px; border: 1.5px solid var(--border); border-radius: 12px; background: white; font-size: 15px; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
+    .btn-save { flex: 2; padding: 14px; border: none; border-radius: 12px; background: linear-gradient(135deg, #a8d5a2, #c3a8e0); color: white; font-size: 15px; font-weight: 700; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
+    .detail-theme-bar { height: 6px; border-radius: 3px; margin-bottom: 20px; }
+    .detail-name { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .detail-address { font-size: 14px; color: var(--text-light); margin-bottom: 12px; }
+    .detail-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .detail-stars { font-size: 20px; color: #FFB74D; margin-bottom: 12px; }
+    .detail-review { font-size: 14px; line-height: 1.7; color: #555; background: #f9f9f9; padding: 14px; border-radius: 12px; margin-bottom: 16px; }
+    .detail-user { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-light); }
+    .detail-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-delete { flex: 1; padding: 12px; border: 1.5px solid #ffcdd2; border-radius: 12px; background: white; color: #e57373; font-size: 14px; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
+    .btn-map-go { flex: 2; padding: 12px; border: none; border-radius: 12px; background: #f0faf0; color: #4a9e44; font-size: 14px; font-weight: 600; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
+    .map-info-popup { background: white; border-radius: 12px; padding: 12px 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); min-width: 180px; max-width: 240px; cursor: pointer; }
+    .map-info-popup-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .map-info-popup-theme { font-size: 11px; color: white; padding: 2px 7px; border-radius: 8px; display: inline-block; margin-bottom: 4px; }
+    .map-info-popup-addr { font-size: 12px; color: #888; }
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-light); }
     .empty-state .emoji { font-size: 48px; margin-bottom: 12px; }
     .empty-state p { font-size: 15px; }
-
-    /* 반응형 */
     @media (min-width: 600px) {
-      .modal {
-        border-radius: 24px;
-        margin: 20px;
-        max-height: 85vh;
-      }
+      .modal { border-radius: 24px; margin: 20px; max-height: 85vh; }
       .modal-overlay { align-items: center; }
     }
   </style>
 </head>
 <body>
 
-  <!-- 헤더 -->
   <header class="header">
     <div class="header-left">
       <span style="font-size:22px">🗺️</span>
@@ -638,7 +115,6 @@
     </div>
   </header>
 
-  <!-- 테마 탭 -->
   <div class="tabs">
     <button class="tab active" data-theme="전체" onclick="selectTheme(this, '전체')">🗺️ 전체</button>
     <button class="tab" data-theme="맛집" onclick="selectTheme(this, '맛집')">🍽️ 맛집</button>
@@ -647,13 +123,11 @@
     <button class="tab" data-theme="가볼만한곳" onclick="selectTheme(this, '가볼만한곳')">📍 가볼만한곳</button>
   </div>
 
-  <!-- 지도/목록 전환 -->
   <div class="view-toggle">
     <button class="view-btn active" id="btnMapView" onclick="switchView('map')">🗺️ 지도</button>
     <button class="view-btn" id="btnListView" onclick="switchView('list')">📋 목록</button>
   </div>
 
-  <!-- 콘텐츠 -->
   <div class="content">
     <div id="map"></div>
     <div class="list-view" id="listView">
@@ -662,15 +136,12 @@
     </div>
   </div>
 
-  <!-- 장소 추가 버튼 -->
   <button class="fab" onclick="openAddModal()">＋</button>
 
-  <!-- ── 장소 추가 모달 ── -->
   <div class="modal-overlay" id="addModal" onclick="closeAddModal(event)">
     <div class="modal">
       <div class="modal-handle"></div>
       <h2 class="modal-title">새 장소 추가</h2>
-
       <div class="form-group">
         <label class="form-label">테마 선택</label>
         <div class="theme-grid">
@@ -680,12 +151,10 @@
           <div class="theme-option" data-theme="가볼만한곳" onclick="selectThemeOption(this)">📍 가볼만한곳</div>
         </div>
       </div>
-
       <div class="form-group">
         <label class="form-label">장소명</label>
         <input type="text" class="form-input" id="placeName" placeholder="예: 하동관" />
       </div>
-
       <div class="form-group">
         <label class="form-label">주소</label>
         <div class="addr-search-row">
@@ -695,7 +164,6 @@
         <input type="hidden" id="placeLat" />
         <input type="hidden" id="placeLng" />
       </div>
-
       <div class="form-group">
         <label class="form-label">지역</label>
         <select class="form-select" id="placeRegion">
@@ -708,7 +176,6 @@
           <option>부산</option><option>제주</option>
         </select>
       </div>
-
       <div class="form-group">
         <label class="form-label">별점</label>
         <div class="star-input" id="starInput">
@@ -719,17 +186,14 @@
           <button class="star-btn" data-star="5" onclick="setStar(5)">★</button>
         </div>
       </div>
-
       <div class="form-group">
         <label class="form-label">후기 <span style="color:#aaa;font-weight:400">(선택)</span></label>
         <textarea class="form-input" id="placeReview" rows="3" placeholder="간단한 후기를 남겨보세요"></textarea>
       </div>
-
       <div class="form-group">
         <label class="form-label">메모 <span style="color:#aaa;font-weight:400">(선택)</span></label>
         <input type="text" class="form-input" id="placeMemo" placeholder="예: 주차 편함, 예약 필수" />
       </div>
-
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal('addModal')">취소</button>
         <button class="btn-save" onclick="savePlace()">저장하기</button>
@@ -737,7 +201,6 @@
     </div>
   </div>
 
-  <!-- ── 장소 상세 모달 ── -->
   <div class="modal-overlay" id="detailModal" onclick="closeDetailModal(event)">
     <div class="modal" id="detailContent">
       <div class="modal-handle"></div>
@@ -755,13 +218,11 @@
     </div>
   </div>
 
-  <!-- 카카오 지도 SDK -->
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=f7da18f5467c98e0e45cdd5bd535596d&libraries=services&autoload=false"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
   <script>
-    // ── 상태 변수 ──
     let map, markers = [];
     let currentTheme = '전체';
     let currentRegion = '전체';
@@ -773,17 +234,14 @@
     let openInfoWindow = null;
     let currentDetailPlace = null;
 
-    // ── 초기화 ──
     async function init() {
       currentUser = await checkAuth();
       if (!currentUser) return;
 
-      // 유저 배지 표시
       const cfg = getUserConfig(currentUser.email);
       document.getElementById('userDot').style.background = cfg.color;
       document.getElementById('userName').textContent = cfg.name;
 
-      // 카카오 지도 초기화
       kakao.maps.load(() => {
         const container = document.getElementById('map');
         map = new kakao.maps.Map(container, {
@@ -794,13 +252,11 @@
       });
     }
 
-    // ── 장소 불러오기 ──
     async function loadPlaces() {
       const { data, error } = await supabase
         .from('TreasureMap')
         .select('*')
         .order('created_at', { ascending: false });
-
       if (error) { console.error(error); return; }
       allPlaces = data || [];
       renderAll();
@@ -821,27 +277,18 @@
       });
     }
 
-    // ── 지도 마커 렌더링 ──
     function renderMarkers(places) {
-      markers.forEach(m => m.setMap(null));
+      markers.forEach(m => { if(m.overlay) m.overlay.setMap(null); });
       markers = [];
-      if (openInfoWindow) { openInfoWindow.close(); openInfoWindow = null; }
+      if (openInfoWindow) { openInfoWindow.setMap(null); openInfoWindow = null; }
 
       places.forEach(place => {
         if (!place.lat || !place.lng) return;
-
         const userCfg = getUserConfig(place.user_email || '');
-        const themeCfg = THEMES[place.theme] || { color: '#aaa', emoji: '📍' };
+        const themeCfg = THEMES[place.theme] || { color: '#aaa', emoji: '📍', label: place.theme };
 
-        // 커스텀 마커 (원형 점)
-        const markerContent = `
-          <div style="
-            width:16px; height:16px; border-radius:50%;
-            background:${userCfg.markerColor};
-            border:3px solid ${themeCfg.color};
-            box-shadow:0 2px 6px rgba(0,0,0,0.25);
-            cursor:pointer;
-          "></div>`;
+        const markerContent = document.createElement('div');
+        markerContent.style.cssText = `width:16px;height:16px;border-radius:50%;background:${userCfg.markerColor};border:3px solid ${themeCfg.color};box-shadow:0 2px 6px rgba(0,0,0,0.25);cursor:pointer;`;
 
         const markerPosition = new kakao.maps.LatLng(place.lat, place.lng);
         const customOverlay = new kakao.maps.CustomOverlay({
@@ -849,102 +296,77 @@
           content: markerContent,
           zIndex: 3
         });
-
         customOverlay.setMap(map);
 
-        // 클릭 시 인포윈도우
-        const infoContent = `
-          <div class="map-info-popup" onclick="showDetail('${place.id}')">
-            <div class="map-info-popup-name">${place.name}</div>
-            <span class="map-info-popup-theme" style="background:${themeCfg.color}">${themeCfg.emoji} ${themeCfg.label}</span>
-            <div class="map-info-popup-addr">${place.address || ''}</div>
-          </div>`;
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'map-info-popup';
+        infoDiv.innerHTML = `
+          <div class="map-info-popup-name">${place.name}</div>
+          <span class="map-info-popup-theme" style="background:${themeCfg.color}">${themeCfg.emoji} ${themeCfg.label}</span>
+          <div class="map-info-popup-addr">${place.address || ''}</div>`;
+        infoDiv.onclick = () => showDetail(place.id);
 
-        const infoWindow = new kakao.maps.CustomOverlay({
+        const infoOverlay = new kakao.maps.CustomOverlay({
           position: markerPosition,
-          content: infoContent,
+          content: infoDiv,
           yAnchor: 1.4,
           zIndex: 10
         });
 
-        // 마커 DOM에 클릭 이벤트 추가
-        customOverlay.setMap(map);
-        const el = customOverlay.getContent();
-        if (typeof el === 'string') {
-          // DOM 접근을 위해 잠시 후에 처리
-          setTimeout(() => {
-            const overlayEl = document.querySelector(`div[title="${place.name}"]`);
-          }, 100);
-        }
+        markerContent.onclick = () => {
+          if (openInfoWindow) { openInfoWindow.setMap(null); openInfoWindow = null; }
+          infoOverlay.setMap(map);
+          openInfoWindow = infoOverlay;
+        };
 
         kakao.maps.event.addListener(map, 'click', () => {
           if (openInfoWindow) { openInfoWindow.setMap(null); openInfoWindow = null; }
         });
 
-        markers.push({ overlay: customOverlay, info: infoWindow, place });
+        markers.push({ overlay: customOverlay, info: infoOverlay, place });
       });
-
-      // 마커 클릭 이벤트 (CustomOverlay는 이벤트를 직접 DOM에서 처리)
-      document.querySelectorAll('.kakao-marker').forEach(() => {});
     }
 
-    // ── 목록 렌더링 ──
     function renderList(places) {
       const container = document.getElementById('placeList');
       if (places.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="emoji">🗺️</div>
-            <p>아직 저장된 장소가 없어요</p>
-            <p style="font-size:13px;margin-top:6px;color:#bbb">+ 버튼으로 추가해보세요!</p>
-          </div>`;
+        container.innerHTML = `<div class="empty-state"><div class="emoji">🗺️</div><p>아직 저장된 장소가 없어요</p><p style="font-size:13px;margin-top:6px;color:#bbb">+ 버튼으로 추가해보세요!</p></div>`;
         return;
       }
-
       container.innerHTML = places.map(p => {
         const userCfg = getUserConfig(p.user_email || '');
         const themeCfg = THEMES[p.theme] || { color: '#aaa', emoji: '📍', label: p.theme };
         const stars = p.rating ? '★'.repeat(p.rating) + '☆'.repeat(5 - p.rating) : '';
-        return `
-          <div class="place-card" onclick="showDetail('${p.id}')">
-            <div class="card-header">
-              <div class="card-title">${p.name}</div>
-              <div class="card-theme-badge" style="background:${themeCfg.color}">${themeCfg.emoji} ${themeCfg.label}</div>
-            </div>
-            <div class="card-address">📍 ${p.address || ''}</div>
-            <div class="card-meta">
-              ${p.region ? `<span class="card-region">${p.region}</span>` : ''}
-              ${stars ? `<span class="card-stars">${stars}</span>` : ''}
-              <span class="card-user">
-                <span class="card-user-dot" style="background:${userCfg.color}"></span>
-                ${userCfg.name}
-              </span>
-            </div>
-            ${p.review ? `<div class="card-review">${p.review}</div>` : ''}
-          </div>`;
+        return `<div class="place-card" onclick="showDetail('${p.id}')">
+          <div class="card-header">
+            <div class="card-title">${p.name}</div>
+            <div class="card-theme-badge" style="background:${themeCfg.color}">${themeCfg.emoji} ${themeCfg.label}</div>
+          </div>
+          <div class="card-address">📍 ${p.address || ''}</div>
+          <div class="card-meta">
+            ${p.region ? `<span class="card-region">${p.region}</span>` : ''}
+            ${stars ? `<span class="card-stars">${stars}</span>` : ''}
+            <span class="card-user"><span class="card-user-dot" style="background:${userCfg.color}"></span>${userCfg.name}</span>
+          </div>
+          ${p.review ? `<div class="card-review">${p.review}</div>` : ''}
+        </div>`;
       }).join('');
     }
 
-    // ── 지역 필터 렌더링 ──
     function renderRegionFilter() {
       const regions = ['전체', ...new Set(allPlaces.map(p => p.region).filter(Boolean))];
-      const container = document.getElementById('regionFilter');
-      container.innerHTML = regions.map(r => `
-        <button class="region-chip ${currentRegion === r ? 'active' : ''}"
-          onclick="selectRegion('${r}')">${r}</button>
-      `).join('');
+      document.getElementById('regionFilter').innerHTML = regions.map(r =>
+        `<button class="region-chip ${currentRegion === r ? 'active' : ''}" onclick="selectRegion('${r}')">${r}</button>`
+      ).join('');
     }
 
-    // ── 상세보기 ──
     function showDetail(id) {
       const place = allPlaces.find(p => p.id === id);
       if (!place) return;
       currentDetailPlace = place;
-
       const themeCfg = THEMES[place.theme] || { color: '#aaa', emoji: '📍', label: place.theme };
       const userCfg = getUserConfig(place.user_email || '');
       const stars = place.rating ? '★'.repeat(place.rating) + '☆'.repeat(5 - place.rating) : '별점 없음';
-
       document.getElementById('detailThemeBar').style.background = themeCfg.color;
       document.getElementById('detailName').textContent = place.name;
       document.getElementById('detailAddress').textContent = '📍 ' + (place.address || '');
@@ -953,37 +375,22 @@
       document.getElementById('detailMeta').innerHTML = `
         ${place.region ? `<span class="card-region">${place.region}</span>` : ''}
         <span class="card-theme-badge" style="background:${themeCfg.color};color:white;font-size:11px;padding:3px 8px;border-radius:10px">${themeCfg.emoji} ${themeCfg.label}</span>
-        ${place.memo ? `<span class="card-region">📝 ${place.memo}</span>` : ''}
-      `;
+        ${place.memo ? `<span class="card-region">📝 ${place.memo}</span>` : ''}`;
       document.getElementById('detailUser').innerHTML = `
-        <span class="card-user-dot" style="background:${userCfg.color};width:10px;height:10px;border-radius:50%;display:inline-block"></span>
-        <span>${userCfg.name}이 저장한 장소</span>
-      `;
-
-      // 본인이 저장한 것만 삭제 가능
-      const deleteBtn = document.getElementById('detailDeleteBtn');
-      deleteBtn.style.display = (place.user_id === currentUser.id) ? 'block' : 'none';
-
+        <span style="background:${userCfg.color};width:10px;height:10px;border-radius:50%;display:inline-block"></span>
+        <span>${userCfg.name}이 저장한 장소</span>`;
+      document.getElementById('detailDeleteBtn').style.display = (place.user_id === currentUser.id) ? 'block' : 'none';
       document.getElementById('detailModal').classList.add('show');
     }
 
     function closeDetailModal(e) {
-      if (e.target === document.getElementById('detailModal')) {
-        document.getElementById('detailModal').classList.remove('show');
-      }
+      if (e.target === document.getElementById('detailModal')) document.getElementById('detailModal').classList.remove('show');
     }
 
     async function deletePlace() {
       if (!confirm('정말 삭제하시겠어요?')) return;
-      const { error } = await supabase
-        .from('TreasureMap')
-        .delete()
-        .eq('id', currentDetailPlace.id);
-
-      if (!error) {
-        closeModal('detailModal');
-        loadPlaces();
-      }
+      const { error } = await supabase.from('TreasureMap').delete().eq('id', currentDetailPlace.id);
+      if (!error) { closeModal('detailModal'); loadPlaces(); }
     }
 
     function goToKakaoMap() {
@@ -992,29 +399,17 @@
       window.open(`https://map.kakao.com/link/search/${query}`, '_blank');
     }
 
-    // ── 장소 추가 ──
     function openAddModal() {
-      selectedStar = 0;
-      selectedThemeOption = '';
-      document.getElementById('placeName').value = '';
-      document.getElementById('placeAddr').value = '';
-      document.getElementById('placeLat').value = '';
-      document.getElementById('placeLng').value = '';
+      selectedStar = 0; selectedThemeOption = '';
+      ['placeName','placeAddr','placeLat','placeLng','placeReview','placeMemo'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('placeRegion').value = '';
-      document.getElementById('placeReview').value = '';
-      document.getElementById('placeMemo').value = '';
       document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.theme-option').forEach(b => b.classList.remove('selected'));
       document.getElementById('addModal').classList.add('show');
     }
 
-    function closeAddModal(e) {
-      if (e.target === document.getElementById('addModal')) closeModal('addModal');
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('show');
-    }
+    function closeAddModal(e) { if (e.target === document.getElementById('addModal')) closeModal('addModal'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
     function selectThemeOption(el) {
       document.querySelectorAll('.theme-option').forEach(b => b.classList.remove('selected'));
@@ -1024,9 +419,7 @@
 
     function setStar(n) {
       selectedStar = n;
-      document.querySelectorAll('.star-btn').forEach((b, i) => {
-        b.classList.toggle('active', i < n);
-      });
+      document.querySelectorAll('.star-btn').forEach((b, i) => b.classList.toggle('active', i < n));
     }
 
     function searchAddress() {
@@ -1034,8 +427,6 @@
         oncomplete: function(data) {
           const addr = data.roadAddress || data.jibunAddress;
           document.getElementById('placeAddr').value = addr;
-
-          // 좌표 변환
           const geocoder = new kakao.maps.services.Geocoder();
           geocoder.addressSearch(addr, function(result, status) {
             if (status === kakao.maps.services.Status.OK) {
@@ -1051,63 +442,41 @@
       const name = document.getElementById('placeName').value.trim();
       const address = document.getElementById('placeAddr').value.trim();
       const region = document.getElementById('placeRegion').value;
-
       if (!selectedThemeOption) { alert('테마를 선택해주세요'); return; }
       if (!name) { alert('장소명을 입력해주세요'); return; }
       if (!address) { alert('주소를 검색해주세요'); return; }
       if (!region) { alert('지역을 선택해주세요'); return; }
-
       const { error } = await supabase.from('TreasureMap').insert({
-        user_id: currentUser.id,
-        user_email: currentUser.email,
-        name,
-        address,
-        theme: selectedThemeOption,
-        region,
+        user_id: currentUser.id, user_email: currentUser.email,
+        name, address, theme: selectedThemeOption, region,
         lat: parseFloat(document.getElementById('placeLat').value) || null,
         lng: parseFloat(document.getElementById('placeLng').value) || null,
         rating: selectedStar || null,
         review: document.getElementById('placeReview').value.trim() || null,
         memo: document.getElementById('placeMemo').value.trim() || null,
       });
-
       if (error) { alert('저장 실패: ' + error.message); return; }
       closeModal('addModal');
       loadPlaces();
     }
 
-    // ── 뷰 전환 ──
     function switchView(view) {
       currentView = view;
-      const mapEl = document.getElementById('map');
-      const listEl = document.getElementById('listView');
       document.getElementById('btnMapView').classList.toggle('active', view === 'map');
       document.getElementById('btnListView').classList.toggle('active', view === 'list');
-      if (view === 'map') {
-        mapEl.style.display = 'block';
-        listEl.classList.remove('show');
-      } else {
-        mapEl.style.display = 'none';
-        listEl.classList.add('show');
-      }
+      document.getElementById('map').style.display = view === 'map' ? 'block' : 'none';
+      document.getElementById('listView').classList.toggle('show', view === 'list');
     }
 
-    // ── 테마 필터 ──
     function selectTheme(el, theme) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       el.classList.add('active');
-      currentTheme = theme;
-      currentRegion = '전체';
+      currentTheme = theme; currentRegion = '전체';
       renderAll();
     }
 
-    // ── 지역 필터 ──
-    function selectRegion(region) {
-      currentRegion = region;
-      renderAll();
-    }
+    function selectRegion(region) { currentRegion = region; renderAll(); }
 
-    // ── 로그아웃 ──
     async function handleLogout() {
       if (confirm('로그아웃 하시겠어요?')) {
         await supabase.auth.signOut();
@@ -1115,25 +484,7 @@
       }
     }
 
-   // ── 초기화 ──
-async function init() {
-  currentUser = await checkAuth();
-  if (!currentUser) return;
-
-  const cfg = getUserConfig(currentUser.email);
-  document.getElementById('userDot').style.background = cfg.color;
-  document.getElementById('userName').textContent = cfg.name;
-
-  const container = document.getElementById('map');
-  map = new kakao.maps.Map(container, {
-    center: new kakao.maps.LatLng(37.5665, 126.9780),
-    level: 7
-  });
-  loadPlaces();
-}
-
-// ── 시작 ──
-init();
+    init();
   </script>
 </body>
 </html>
