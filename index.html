@@ -9,38 +9,57 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
-      --green: #a8d5a2; --purple: #c3a8e0;
-      --green-dark: #6dbf67; --purple-dark: #a97dd4;
-      --bg: #f5f5f0; --white: #ffffff; --text: #333333;
-      --text-light: #888888; --border: #e8e8e8;
-      --radius: 16px; --shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --bg: #f5f5f0; --text: #333; --text-light: #888;
+      --border: #e8e8e8; --radius: 16px;
+      --shadow: 0 4px 20px rgba(0,0,0,0.08);
     }
     body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* 헤더 */
     .header { background: white; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.06); z-index: 100; flex-shrink: 0; }
     .header-left { display: flex; align-items: center; gap: 8px; }
     .header h1 { font-size: 18px; font-weight: 700; }
     .user-badge { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
     .user-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .header-right { display: flex; align-items: center; gap: 8px; }
+    .header-right { display: flex; align-items: center; gap: 4px; }
     .btn-icon { background: none; border: none; font-size: 20px; cursor: pointer; padding: 6px; border-radius: 8px; transition: background 0.15s; }
     .btn-icon:hover { background: #f0f0f0; }
+
+    /* 탭 */
     .tabs { background: white; display: flex; padding: 0 12px; gap: 4px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .tabs::-webkit-scrollbar { display: none; }
     .tab { flex-shrink: 0; padding: 10px 14px; border: none; background: none; font-size: 13px; font-family: 'Noto Sans KR', sans-serif; font-weight: 500; color: var(--text-light); cursor: pointer; border-bottom: 2.5px solid transparent; transition: all 0.15s; white-space: nowrap; }
     .tab.active { color: var(--text); border-bottom-color: #a8d5a2; }
+
+    /* 뷰 전환 */
     .view-toggle { display: flex; background: white; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .view-btn { flex: 1; padding: 8px; border: none; background: none; font-size: 13px; font-family: 'Noto Sans KR', sans-serif; color: var(--text-light); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.15s; }
     .view-btn.active { color: var(--text); font-weight: 600; background: #f9fdf9; }
+
+    /* 콘텐츠 */
     .content { flex: 1; overflow: hidden; position: relative; }
     #map { width: 100%; height: 100%; }
+
+    /* 목록 */
     .list-view { height: 100%; overflow-y: auto; padding: 12px; display: none; flex-direction: column; gap: 10px; }
     .list-view.show { display: flex; }
+    .list-toolbar { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; padding: 4px 0; }
+    .list-toolbar-left { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-light); }
+    .btn-select-all { background: none; border: 1.5px solid var(--border); border-radius: 8px; padding: 4px 10px; font-size: 12px; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
+    .btn-delete-selected { background: #ffebee; border: 1.5px solid #ffcdd2; border-radius: 8px; padding: 4px 10px; font-size: 12px; font-family: 'Noto Sans KR', sans-serif; color: #e57373; cursor: pointer; display: none; }
+    .btn-delete-selected.show { display: block; }
+
+    /* 지역 필터 */
     .region-filter { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; flex-shrink: 0; }
     .region-filter::-webkit-scrollbar { display: none; }
     .region-chip { flex-shrink: 0; padding: 6px 12px; border-radius: 20px; border: 1.5px solid var(--border); background: white; font-size: 12px; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; transition: all 0.15s; }
     .region-chip.active { border-color: #a8d5a2; background: #a8d5a2; color: white; font-weight: 600; }
-    .place-card { background: white; border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); cursor: pointer; transition: transform 0.15s; }
+
+    /* 장소 카드 */
+    .place-card { background: white; border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); cursor: pointer; transition: transform 0.15s; display: flex; align-items: flex-start; gap: 10px; }
     .place-card:active { transform: scale(0.98); }
+    .card-checkbox { flex-shrink: 0; width: 18px; height: 18px; margin-top: 2px; accent-color: #a8d5a2; cursor: pointer; }
+    .card-body { flex: 1; min-width: 0; }
     .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
     .card-title { font-size: 16px; font-weight: 700; flex: 1; }
     .card-theme-badge { font-size: 11px; padding: 3px 8px; border-radius: 10px; color: white; font-weight: 600; flex-shrink: 0; margin-left: 8px; }
@@ -51,8 +70,12 @@
     .card-user { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-light); }
     .card-user-dot { width: 8px; height: 8px; border-radius: 50%; }
     .card-review { font-size: 13px; color: #666; margin-top: 6px; line-height: 1.5; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+    /* FAB */
     .fab { position: fixed; bottom: 24px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #a8d5a2, #c3a8e0); border: none; color: white; font-size: 26px; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.18); z-index: 200; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; }
     .fab:active { transform: scale(0.93); }
+
+    /* 모달 */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 300; display: none; align-items: flex-end; justify-content: center; }
     .modal-overlay.show { display: flex; }
     .modal { background: white; border-radius: 24px 24px 0 0; padding: 24px 20px 40px; width: 100%; max-width: 600px; max-height: 92dvh; overflow-y: auto; animation: slideUp 0.25s ease; }
@@ -76,23 +99,32 @@
     .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
     .btn-cancel { flex: 1; padding: 14px; border: 1.5px solid var(--border); border-radius: 12px; background: white; font-size: 15px; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
     .btn-save { flex: 2; padding: 14px; border: none; border-radius: 12px; background: linear-gradient(135deg, #a8d5a2, #c3a8e0); color: white; font-size: 15px; font-weight: 700; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
+
+    /* 상세 모달 */
     .detail-theme-bar { height: 6px; border-radius: 3px; margin-bottom: 20px; }
     .detail-name { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
     .detail-address { font-size: 14px; color: var(--text-light); margin-bottom: 12px; }
     .detail-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
     .detail-stars { font-size: 20px; color: #FFB74D; margin-bottom: 12px; }
     .detail-review { font-size: 14px; line-height: 1.7; color: #555; background: #f9f9f9; padding: 14px; border-radius: 12px; margin-bottom: 16px; }
-    .detail-user { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-light); }
-    .detail-actions { display: flex; gap: 10px; margin-top: 20px; }
-    .btn-delete { flex: 1; padding: 12px; border: 1.5px solid #ffcdd2; border-radius: 12px; background: white; color: #e57373; font-size: 14px; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
+    .detail-user { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-light); margin-bottom: 16px; }
+    .detail-actions { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+    .btn-delete { flex: 1; padding: 12px; border: 1.5px solid #ffcdd2; border-radius: 12px; background: white; color: #e57373; font-size: 14px; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; min-width: 80px; }
+    .btn-edit { flex: 1; padding: 12px; border: 1.5px solid #a8d5a2; border-radius: 12px; background: white; color: #4a9e44; font-size: 14px; font-weight: 600; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; min-width: 80px; }
     .btn-map-go { flex: 2; padding: 12px; border: none; border-radius: 12px; background: #f0faf0; color: #4a9e44; font-size: 14px; font-weight: 600; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
-    .map-info-popup { background: white; border-radius: 12px; padding: 12px 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); min-width: 180px; max-width: 240px; cursor: pointer; }
-    .map-info-popup-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-    .map-info-popup-theme { font-size: 11px; color: white; padding: 2px 7px; border-radius: 8px; display: inline-block; margin-bottom: 4px; }
-    .map-info-popup-addr { font-size: 12px; color: #888; }
+
+    /* 빈 상태 */
     .empty-state { text-align: center; padding: 60px 20px; color: var(--text-light); }
     .empty-state .emoji { font-size: 48px; margin-bottom: 12px; }
     .empty-state p { font-size: 15px; }
+
+    /* 지도 팝업 */
+    .map-info-popup { background: white; border-radius: 12px; padding: 12px 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); min-width: 180px; max-width: 240px; cursor: pointer; }
+    .map-info-popup-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .map-info-popup-theme { font-size: 11px; color: white; padding: 2px 7px; border-radius: 8px; display: inline-block; margin-bottom: 4px; }
+    .map-info-popup-addr { font-size: 12px; color: #888; margin-bottom: 8px; }
+    .map-info-popup-btn { width: 100%; padding: 8px; border: none; border-radius: 8px; background: linear-gradient(135deg, #a8d5a2, #c3a8e0); color: white; font-size: 13px; font-weight: 600; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
+
     @media (min-width: 600px) {
       .modal { border-radius: 24px; margin: 20px; max-height: 85vh; }
       .modal-overlay { align-items: center; }
@@ -132,16 +164,24 @@
     <div id="map"></div>
     <div class="list-view" id="listView">
       <div class="region-filter" id="regionFilter"></div>
+      <div class="list-toolbar">
+        <div class="list-toolbar-left">
+          <button class="btn-select-all" onclick="toggleSelectAll()">전체선택</button>
+          <button class="btn-delete-selected" id="btnDeleteSelected" onclick="deleteSelected()">🗑️ 선택삭제</button>
+        </div>
+        <span id="selectedCount" style="font-size:12px;color:#888"></span>
+      </div>
       <div id="placeList"></div>
     </div>
   </div>
 
   <button class="fab" onclick="openAddModal()">＋</button>
 
+  <!-- 장소 추가/수정 모달 -->
   <div class="modal-overlay" id="addModal" onclick="closeAddModal(event)">
     <div class="modal">
       <div class="modal-handle"></div>
-      <h2 class="modal-title">새 장소 추가</h2>
+      <h2 class="modal-title" id="addModalTitle">새 장소 추가</h2>
       <div class="form-group">
         <label class="form-label">테마 선택</label>
         <div class="theme-grid">
@@ -179,11 +219,11 @@
       <div class="form-group">
         <label class="form-label">별점</label>
         <div class="star-input" id="starInput">
-          <button class="star-btn" data-star="1" onclick="setStar(1)">★</button>
-          <button class="star-btn" data-star="2" onclick="setStar(2)">★</button>
-          <button class="star-btn" data-star="3" onclick="setStar(3)">★</button>
-          <button class="star-btn" data-star="4" onclick="setStar(4)">★</button>
-          <button class="star-btn" data-star="5" onclick="setStar(5)">★</button>
+          <button class="star-btn" onclick="setStar(1)">★</button>
+          <button class="star-btn" onclick="setStar(2)">★</button>
+          <button class="star-btn" onclick="setStar(3)">★</button>
+          <button class="star-btn" onclick="setStar(4)">★</button>
+          <button class="star-btn" onclick="setStar(5)">★</button>
         </div>
       </div>
       <div class="form-group">
@@ -201,8 +241,9 @@
     </div>
   </div>
 
+  <!-- 장소 상세 모달 -->
   <div class="modal-overlay" id="detailModal" onclick="closeDetailModal(event)">
-    <div class="modal" id="detailContent">
+    <div class="modal">
       <div class="modal-handle"></div>
       <div class="detail-theme-bar" id="detailThemeBar"></div>
       <h2 class="detail-name" id="detailName"></h2>
@@ -213,7 +254,8 @@
       <div class="detail-user" id="detailUser"></div>
       <div class="detail-actions">
         <button class="btn-delete" id="detailDeleteBtn" onclick="deletePlace()">🗑️ 삭제</button>
-        <button class="btn-map-go" onclick="goToKakaoMap()">🗺️ 카카오맵에서 보기</button>
+        <button class="btn-edit" id="detailEditBtn" onclick="editPlace()">✏️ 수정</button>
+        <button class="btn-map-go" onclick="goToKakaoMap()">🗺️ 카카오맵</button>
       </div>
     </div>
   </div>
@@ -232,15 +274,16 @@
     let currentUser = null;
     let openInfoWindow = null;
     let currentDetailPlace = null;
+    let editingId = null;
+    let selectedIds = new Set();
+    let isSelectAll = false;
 
-    // 카카오 지도 SDK를 동적으로 로드
+    // 카카오 지도 동적 로드
     function loadKakaoMap() {
       return new Promise((resolve) => {
         const script = document.createElement('script');
         script.src = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey=f7da18f5467c98e0e45cdd5bd535596d&libraries=services&autoload=false';
-        script.onload = () => {
-          kakao.maps.load(() => resolve());
-        };
+        script.onload = () => { kakao.maps.load(() => resolve()); };
         document.head.appendChild(script);
       });
     }
@@ -248,28 +291,50 @@
     async function init() {
       currentUser = await checkAuth();
       if (!currentUser) return;
-
       const cfg = getUserConfig(currentUser.email);
       document.getElementById('userDot').style.background = cfg.color;
       document.getElementById('userName').textContent = cfg.name;
-
       await loadKakaoMap();
-
       const container = document.getElementById('map');
       map = new kakao.maps.Map(container, {
         center: new kakao.maps.LatLng(37.5665, 126.9780),
         level: 7
       });
+      // 지도 클릭으로 장소 추가
+      kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+        if (openInfoWindow) { openInfoWindow.setMap(null); openInfoWindow = null; return; }
+        const lat = mouseEvent.latLng.getLat();
+        const lng = mouseEvent.latLng.getLng();
+        openAddModalFromMap(lat, lng);
+      });
       loadPlaces();
+    }
+
+    // 지도 클릭으로 장소 추가 (주소 역지오코딩)
+    function openAddModalFromMap(lat, lng) {
+      const geocoder = new kakao.maps.services.Geocoder();
+      geocoder.coord2Address(lng, lat, function(result, status) {
+        if (status === kakao.maps.services.Status.OK) {
+          const addr = result[0].road_address
+            ? result[0].road_address.address_name
+            : result[0].address.address_name;
+          resetAddModal();
+          document.getElementById('placeAddr').value = addr;
+          document.getElementById('placeLat').value = lat;
+          document.getElementById('placeLng').value = lng;
+          document.getElementById('addModalTitle').textContent = '새 장소 추가';
+          document.getElementById('addModal').classList.add('show');
+        }
+      });
     }
 
     async function loadPlaces() {
       const { data, error } = await supabase
-        .from('TreasureMap')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from('TreasureMap').select('*').order('created_at', { ascending: false });
       if (error) { console.error(error); return; }
       allPlaces = data || [];
+      selectedIds.clear();
+      updateDeleteBtn();
       renderAll();
     }
 
@@ -288,6 +353,15 @@
       });
     }
 
+    // 마커 SVG 생성 (네이버 즐겨찾기 스타일)
+    function makeMarkerSVG(themeColor, starColor) {
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">
+        <ellipse cx="16" cy="38" rx="6" ry="2.5" fill="rgba(0,0,0,0.18)"/>
+        <circle cx="16" cy="16" r="15" fill="${themeColor}" stroke="white" stroke-width="2"/>
+        <text x="16" y="21" text-anchor="middle" font-size="14" fill="${starColor}">★</text>
+      </svg>`;
+    }
+
     function renderMarkers(places) {
       markers.forEach(m => { if(m.overlay) m.overlay.setMap(null); });
       markers = [];
@@ -298,13 +372,16 @@
         const userCfg = getUserConfig(place.user_email || '');
         const themeCfg = THEMES[place.theme] || { color: '#aaa', emoji: '📍', label: place.theme };
 
-        const markerContent = document.createElement('div');
-        markerContent.style.cssText = `width:16px;height:16px;border-radius:50%;background:${userCfg.markerColor};border:3px solid ${themeCfg.color};box-shadow:0 2px 6px rgba(0,0,0,0.25);cursor:pointer;`;
+        const svgContent = makeMarkerSVG(themeCfg.color, userCfg.starColor);
+        const markerDiv = document.createElement('div');
+        markerDiv.style.cssText = 'cursor:pointer;width:32px;height:40px;';
+        markerDiv.innerHTML = svgContent;
 
         const markerPosition = new kakao.maps.LatLng(place.lat, place.lng);
         const customOverlay = new kakao.maps.CustomOverlay({
           position: markerPosition,
-          content: markerContent,
+          content: markerDiv,
+          yAnchor: 1,
           zIndex: 3
         });
         customOverlay.setMap(map);
@@ -314,25 +391,22 @@
         infoDiv.innerHTML = `
           <div class="map-info-popup-name">${place.name}</div>
           <span class="map-info-popup-theme" style="background:${themeCfg.color}">${themeCfg.emoji} ${themeCfg.label}</span>
-          <div class="map-info-popup-addr">${place.address || ''}</div>`;
-        infoDiv.onclick = () => showDetail(place.id);
+          <div class="map-info-popup-addr">${place.address || ''}</div>
+          <button class="map-info-popup-btn" onclick="showDetail('${place.id}')">상세보기 / 수정</button>`;
 
         const infoOverlay = new kakao.maps.CustomOverlay({
           position: markerPosition,
           content: infoDiv,
-          yAnchor: 1.4,
+          yAnchor: 1.5,
           zIndex: 10
         });
 
-        markerContent.onclick = () => {
+        markerDiv.onclick = (e) => {
+          e.stopPropagation();
           if (openInfoWindow) { openInfoWindow.setMap(null); openInfoWindow = null; }
           infoOverlay.setMap(map);
           openInfoWindow = infoOverlay;
         };
-
-        kakao.maps.event.addListener(map, 'click', () => {
-          if (openInfoWindow) { openInfoWindow.setMap(null); openInfoWindow = null; }
-        });
 
         markers.push({ overlay: customOverlay, info: infoOverlay, place });
       });
@@ -348,18 +422,26 @@
         const userCfg = getUserConfig(p.user_email || '');
         const themeCfg = THEMES[p.theme] || { color: '#aaa', emoji: '📍', label: p.theme };
         const stars = p.rating ? '★'.repeat(p.rating) + '☆'.repeat(5 - p.rating) : '';
-        return `<div class="place-card" onclick="showDetail('${p.id}')">
-          <div class="card-header">
-            <div class="card-title">${p.name}</div>
-            <div class="card-theme-badge" style="background:${themeCfg.color}">${themeCfg.emoji} ${themeCfg.label}</div>
+        const checked = selectedIds.has(p.id) ? 'checked' : '';
+        return `<div class="place-card">
+          <input type="checkbox" class="card-checkbox" ${checked}
+            onclick="event.stopPropagation(); toggleSelect('${p.id}')" />
+          <div class="card-body" onclick="showDetail('${p.id}')">
+            <div class="card-header">
+              <div class="card-title">${p.name}</div>
+              <div class="card-theme-badge" style="background:${themeCfg.color}">${themeCfg.emoji} ${themeCfg.label}</div>
+            </div>
+            <div class="card-address">📍 ${p.address || ''}</div>
+            <div class="card-meta">
+              ${p.region ? `<span class="card-region">${p.region}</span>` : ''}
+              ${stars ? `<span class="card-stars">${stars}</span>` : ''}
+              <span class="card-user">
+                <span class="card-user-dot" style="background:${userCfg.color}"></span>
+                ${userCfg.name}
+              </span>
+            </div>
+            ${p.review ? `<div class="card-review">${p.review}</div>` : ''}
           </div>
-          <div class="card-address">📍 ${p.address || ''}</div>
-          <div class="card-meta">
-            ${p.region ? `<span class="card-region">${p.region}</span>` : ''}
-            ${stars ? `<span class="card-stars">${stars}</span>` : ''}
-            <span class="card-user"><span class="card-user-dot" style="background:${userCfg.color}"></span>${userCfg.name}</span>
-          </div>
-          ${p.review ? `<div class="card-review">${p.review}</div>` : ''}
         </div>`;
       }).join('');
     }
@@ -371,6 +453,49 @@
       ).join('');
     }
 
+    // 체크박스 선택
+    function toggleSelect(id) {
+      if (selectedIds.has(id)) selectedIds.delete(id);
+      else selectedIds.add(id);
+      updateDeleteBtn();
+      renderList(filterPlaces());
+    }
+
+    function toggleSelectAll() {
+      const filtered = filterPlaces();
+      if (selectedIds.size === filtered.length) {
+        selectedIds.clear();
+        isSelectAll = false;
+      } else {
+        filtered.forEach(p => selectedIds.add(p.id));
+        isSelectAll = true;
+      }
+      updateDeleteBtn();
+      renderList(filtered);
+    }
+
+    function updateDeleteBtn() {
+      const btn = document.getElementById('btnDeleteSelected');
+      const countEl = document.getElementById('selectedCount');
+      if (selectedIds.size > 0) {
+        btn.classList.add('show');
+        countEl.textContent = `${selectedIds.size}개 선택됨`;
+      } else {
+        btn.classList.remove('show');
+        countEl.textContent = '';
+      }
+    }
+
+    async function deleteSelected() {
+      if (selectedIds.size === 0) return;
+      if (!confirm(`선택한 ${selectedIds.size}개 장소를 삭제할까요?`)) return;
+      const ids = [...selectedIds];
+      const { error } = await supabase.from('TreasureMap').delete().in('id', ids);
+      if (!error) { selectedIds.clear(); loadPlaces(); }
+      else alert('삭제 실패: ' + error.message);
+    }
+
+    // 상세보기
     function showDetail(id) {
       const place = allPlaces.find(p => p.id === id);
       if (!place) return;
@@ -390,12 +515,37 @@
       document.getElementById('detailUser').innerHTML = `
         <span style="background:${userCfg.color};width:10px;height:10px;border-radius:50%;display:inline-block"></span>
         <span>${userCfg.name}이 저장한 장소</span>`;
-      document.getElementById('detailDeleteBtn').style.display = (place.user_id === currentUser.id) ? 'block' : 'none';
+      const isOwner = place.user_id === currentUser.id;
+      document.getElementById('detailDeleteBtn').style.display = isOwner ? 'block' : 'none';
+      document.getElementById('detailEditBtn').style.display = isOwner ? 'block' : 'none';
       document.getElementById('detailModal').classList.add('show');
     }
 
     function closeDetailModal(e) {
       if (e.target === document.getElementById('detailModal')) document.getElementById('detailModal').classList.remove('show');
+    }
+
+    // 수정
+    function editPlace() {
+      if (!currentDetailPlace) return;
+      closeModal('detailModal');
+      const p = currentDetailPlace;
+      editingId = p.id;
+      document.getElementById('addModalTitle').textContent = '장소 수정';
+      document.getElementById('placeName').value = p.name || '';
+      document.getElementById('placeAddr').value = p.address || '';
+      document.getElementById('placeLat').value = p.lat || '';
+      document.getElementById('placeLng').value = p.lng || '';
+      document.getElementById('placeRegion').value = p.region || '';
+      document.getElementById('placeReview').value = p.review || '';
+      document.getElementById('placeMemo').value = p.memo || '';
+      selectedThemeOption = p.theme || '';
+      selectedStar = p.rating || 0;
+      document.querySelectorAll('.theme-option').forEach(b => {
+        b.classList.toggle('selected', b.dataset.theme === p.theme);
+      });
+      document.querySelectorAll('.star-btn').forEach((b, i) => b.classList.toggle('active', i < selectedStar));
+      document.getElementById('addModal').classList.add('show');
     }
 
     async function deletePlace() {
@@ -410,17 +560,28 @@
       window.open(`https://map.kakao.com/link/search/${query}`, '_blank');
     }
 
-    function openAddModal() {
-      selectedStar = 0; selectedThemeOption = '';
+    // 장소 추가/수정 폼
+    function resetAddModal() {
+      editingId = null;
+      selectedStar = 0;
+      selectedThemeOption = '';
       ['placeName','placeAddr','placeLat','placeLng','placeReview','placeMemo'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('placeRegion').value = '';
       document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.theme-option').forEach(b => b.classList.remove('selected'));
+    }
+
+    function openAddModal() {
+      resetAddModal();
+      document.getElementById('addModalTitle').textContent = '새 장소 추가';
       document.getElementById('addModal').classList.add('show');
     }
 
     function closeAddModal(e) { if (e.target === document.getElementById('addModal')) closeModal('addModal'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('show');
+      if (id === 'addModal') { editingId = null; }
+    }
 
     function selectThemeOption(el) {
       document.querySelectorAll('.theme-option').forEach(b => b.classList.remove('selected'));
@@ -457,15 +618,24 @@
       if (!name) { alert('장소명을 입력해주세요'); return; }
       if (!address) { alert('주소를 검색해주세요'); return; }
       if (!region) { alert('지역을 선택해주세요'); return; }
-      const { error } = await supabase.from('TreasureMap').insert({
-        user_id: currentUser.id, user_email: currentUser.email,
+
+      const payload = {
         name, address, theme: selectedThemeOption, region,
         lat: parseFloat(document.getElementById('placeLat').value) || null,
         lng: parseFloat(document.getElementById('placeLng').value) || null,
         rating: selectedStar || null,
         review: document.getElementById('placeReview').value.trim() || null,
         memo: document.getElementById('placeMemo').value.trim() || null,
-      });
+      };
+
+      let error;
+      if (editingId) {
+        ({ error } = await supabase.from('TreasureMap').update(payload).eq('id', editingId));
+      } else {
+        ({ error } = await supabase.from('TreasureMap').insert({
+          ...payload, user_id: currentUser.id, user_email: currentUser.email
+        }));
+      }
       if (error) { alert('저장 실패: ' + error.message); return; }
       closeModal('addModal');
       loadPlaces();
