@@ -313,8 +313,8 @@
       await loadKakaoMap();
       const container = document.getElementById('map');
       map = new kakao.maps.Map(container, {
-        center: new kakao.maps.LatLng(37.5665, 126.9780),
-        level: 7
+        center: new kakao.maps.LatLng(37.6346, 127.2116),
+        level: 5
       });
 
       // 지도 클릭 → 장소 추가 (인포윈도우 열려있으면 닫기만)
@@ -429,30 +429,27 @@
 
         const infoDiv = document.createElement('div');
         infoDiv.className = 'map-info-popup';
-        const nameEl = document.createElement('div');
-        nameEl.className = 'map-info-popup-name';
-        nameEl.textContent = place.name;
-        const themeEl = document.createElement('span');
-        themeEl.className = 'map-info-popup-theme';
-        themeEl.style.background = themeCfg.color;
-        themeEl.textContent = themeCfg.label;
-        const addrEl = document.createElement('div');
-        addrEl.className = 'map-info-popup-addr';
-        addrEl.textContent = place.address || '';
-        const infoBtn = document.createElement('button');
-        infoBtn.className = 'map-info-popup-btn';
-        infoBtn.textContent = '상세보기 / 수정';
-        infoBtn.onclick = (e) => { e.stopPropagation(); showDetail(place.id); };
-        infoDiv.appendChild(nameEl);
-        infoDiv.appendChild(themeEl);
-        infoDiv.appendChild(addrEl);
-        infoDiv.appendChild(infoBtn);
+        infoDiv.innerHTML = `
+          <div class="map-info-popup-name">${place.name}</div>
+          <span class="map-info-popup-theme" style="background:${themeCfg.color}">${themeCfg.label}</span>
+          <div class="map-info-popup-addr">${place.address || ''}</div>
+          <button class="map-info-popup-btn" data-place-id="${place.id}">상세보기 / 수정</button>`;
 
         const infoOverlay = new kakao.maps.CustomOverlay({
           position: markerPosition,
           content: infoDiv,
           yAnchor: 1.5,
           zIndex: 10
+        });
+
+        // 버튼 클릭 이벤트: overlay가 지도에 올라간 후 DOM에서 직접 처리
+        infoDiv.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const btn = e.target.closest('.map-info-popup-btn');
+          if (btn) {
+            const placeId = btn.dataset.placeId;
+            if (placeId) showDetail(placeId);
+          }
         });
 
         markerDiv.onclick = (e) => {
