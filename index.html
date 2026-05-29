@@ -15,7 +15,6 @@
     }
     body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
-    /* 헤더 */
     .header { background: white; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.06); z-index: 100; flex-shrink: 0; }
     .header-left { display: flex; align-items: center; gap: 8px; }
     .header h1 { font-size: 18px; font-weight: 700; }
@@ -25,37 +24,33 @@
     .btn-icon { background: none; border: none; font-size: 20px; cursor: pointer; padding: 6px; border-radius: 8px; transition: background 0.15s; }
     .btn-icon:hover { background: #f0f0f0; }
 
-    /* 탭 */
+    /* 탭 - 색상 동그라미 포함 */
     .tabs { background: white; display: flex; padding: 0 12px; gap: 4px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .tabs::-webkit-scrollbar { display: none; }
-    .tab { flex-shrink: 0; padding: 10px 14px; border: none; background: none; font-size: 13px; font-family: 'Noto Sans KR', sans-serif; font-weight: 500; color: var(--text-light); cursor: pointer; border-bottom: 2.5px solid transparent; transition: all 0.15s; white-space: nowrap; }
+    .tab { flex-shrink: 0; padding: 10px 12px; border: none; background: none; font-size: 13px; font-family: 'Noto Sans KR', sans-serif; font-weight: 500; color: var(--text-light); cursor: pointer; border-bottom: 2.5px solid transparent; transition: all 0.15s; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
     .tab.active { color: var(--text); border-bottom-color: #a8d5a2; }
+    .tab-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
 
-    /* 뷰 전환 */
     .view-toggle { display: flex; background: white; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .view-btn { flex: 1; padding: 8px; border: none; background: none; font-size: 13px; font-family: 'Noto Sans KR', sans-serif; color: var(--text-light); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.15s; }
     .view-btn.active { color: var(--text); font-weight: 600; background: #f9fdf9; }
 
-    /* 콘텐츠 */
     .content { flex: 1; overflow: hidden; position: relative; }
     #map { width: 100%; height: 100%; }
 
-    /* 목록 */
     .list-view { height: 100%; overflow-y: auto; padding: 12px; display: none; flex-direction: column; gap: 10px; }
     .list-view.show { display: flex; }
     .list-toolbar { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; padding: 4px 0; }
-    .list-toolbar-left { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-light); }
+    .list-toolbar-left { display: flex; align-items: center; gap: 8px; }
     .btn-select-all { background: none; border: 1.5px solid var(--border); border-radius: 8px; padding: 4px 10px; font-size: 12px; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
     .btn-delete-selected { background: #ffebee; border: 1.5px solid #ffcdd2; border-radius: 8px; padding: 4px 10px; font-size: 12px; font-family: 'Noto Sans KR', sans-serif; color: #e57373; cursor: pointer; display: none; }
     .btn-delete-selected.show { display: block; }
 
-    /* 지역 필터 */
     .region-filter { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; flex-shrink: 0; }
     .region-filter::-webkit-scrollbar { display: none; }
     .region-chip { flex-shrink: 0; padding: 6px 12px; border-radius: 20px; border: 1.5px solid var(--border); background: white; font-size: 12px; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; transition: all 0.15s; }
     .region-chip.active { border-color: #a8d5a2; background: #a8d5a2; color: white; font-weight: 600; }
 
-    /* 장소 카드 */
     .place-card { background: white; border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); cursor: pointer; transition: transform 0.15s; display: flex; align-items: flex-start; gap: 10px; }
     .place-card:active { transform: scale(0.98); }
     .card-checkbox { flex-shrink: 0; width: 18px; height: 18px; margin-top: 2px; accent-color: #a8d5a2; cursor: pointer; }
@@ -71,25 +66,27 @@
     .card-user-dot { width: 8px; height: 8px; border-radius: 50%; }
     .card-review { font-size: 13px; color: #666; margin-top: 6px; line-height: 1.5; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
-    /* FAB */
     .fab { position: fixed; bottom: 24px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #a8d5a2, #c3a8e0); border: none; color: white; font-size: 26px; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.18); z-index: 200; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; }
     .fab:active { transform: scale(0.93); }
 
-    /* 모달 */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 300; display: none; align-items: flex-end; justify-content: center; }
     .modal-overlay.show { display: flex; }
     .modal { background: white; border-radius: 24px 24px 0 0; padding: 24px 20px 40px; width: 100%; max-width: 600px; max-height: 92dvh; overflow-y: auto; animation: slideUp 0.25s ease; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     .modal-handle { width: 40px; height: 4px; background: #e0e0e0; border-radius: 2px; margin: 0 auto 20px; }
-    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+    .modal-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .modal-title { font-size: 18px; font-weight: 700; }
+    .modal-close-btn { background: none; border: none; font-size: 22px; cursor: pointer; color: #aaa; padding: 4px; line-height: 1; }
+    .modal-close-btn:hover { color: #555; }
     .form-group { margin-bottom: 16px; }
     .form-label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 6px; }
     .form-input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 15px; font-family: 'Noto Sans KR', sans-serif; outline: none; transition: border-color 0.2s; }
     .form-input:focus { border-color: #a8d5a2; }
     .form-select { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 15px; font-family: 'Noto Sans KR', sans-serif; outline: none; background: white; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
     .theme-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .theme-option { padding: 12px; border: 2px solid var(--border); border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.15s; font-size: 13px; font-weight: 500; }
+    .theme-option { padding: 12px; border: 2px solid var(--border); border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.15s; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px; }
     .theme-option.selected { border-color: #a8d5a2; background: #f0faf0; }
+    .theme-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
     .star-input { display: flex; gap: 6px; }
     .star-btn { font-size: 28px; cursor: pointer; background: none; border: none; line-height: 1; transition: transform 0.1s; color: #ddd; }
     .star-btn.active { color: #FFB74D; }
@@ -100,7 +97,6 @@
     .btn-cancel { flex: 1; padding: 14px; border: 1.5px solid var(--border); border-radius: 12px; background: white; font-size: 15px; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
     .btn-save { flex: 2; padding: 14px; border: none; border-radius: 12px; background: linear-gradient(135deg, #a8d5a2, #c3a8e0); color: white; font-size: 15px; font-weight: 700; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
 
-    /* 상세 모달 */
     .detail-theme-bar { height: 6px; border-radius: 3px; margin-bottom: 20px; }
     .detail-name { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
     .detail-address { font-size: 14px; color: var(--text-light); margin-bottom: 12px; }
@@ -113,13 +109,11 @@
     .btn-edit { flex: 1; padding: 12px; border: 1.5px solid #a8d5a2; border-radius: 12px; background: white; color: #4a9e44; font-size: 14px; font-weight: 600; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; min-width: 80px; }
     .btn-map-go { flex: 2; padding: 12px; border: none; border-radius: 12px; background: #f0faf0; color: #4a9e44; font-size: 14px; font-weight: 600; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
 
-    /* 빈 상태 */
     .empty-state { text-align: center; padding: 60px 20px; color: var(--text-light); }
     .empty-state .emoji { font-size: 48px; margin-bottom: 12px; }
     .empty-state p { font-size: 15px; }
 
-    /* 지도 팝업 */
-    .map-info-popup { background: white; border-radius: 12px; padding: 12px 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); min-width: 180px; max-width: 240px; cursor: pointer; }
+    .map-info-popup { background: white; border-radius: 12px; padding: 12px 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); min-width: 180px; max-width: 240px; }
     .map-info-popup-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
     .map-info-popup-theme { font-size: 11px; color: white; padding: 2px 7px; border-radius: 8px; display: inline-block; margin-bottom: 4px; }
     .map-info-popup-addr { font-size: 12px; color: #888; margin-bottom: 8px; }
@@ -148,11 +142,21 @@
   </header>
 
   <div class="tabs">
-    <button class="tab active" data-theme="전체" onclick="selectTheme(this, '전체')">🗺️ 전체</button>
-    <button class="tab" data-theme="맛집" onclick="selectTheme(this, '맛집')">🍽️ 맛집</button>
-    <button class="tab" data-theme="애견동반맛집" onclick="selectTheme(this, '애견동반맛집')">🐾 애견동반맛집</button>
-    <button class="tab" data-theme="숙박" onclick="selectTheme(this, '숙박')">🏨 숙박</button>
-    <button class="tab" data-theme="가볼만한곳" onclick="selectTheme(this, '가볼만한곳')">📍 가볼만한곳</button>
+    <button class="tab active" data-theme="전체" onclick="selectTheme(this, '전체')">
+      <span class="tab-dot" style="background: linear-gradient(135deg,#e53935,#f9a825,#8e24aa,#039be5);"></span>전체
+    </button>
+    <button class="tab" data-theme="맛집" onclick="selectTheme(this, '맛집')">
+      <span class="tab-dot" style="background:#e53935;"></span>맛집
+    </button>
+    <button class="tab" data-theme="애견동반맛집" onclick="selectTheme(this, '애견동반맛집')">
+      <span class="tab-dot" style="background:#f9a825;"></span>애견동반맛집
+    </button>
+    <button class="tab" data-theme="숙박" onclick="selectTheme(this, '숙박')">
+      <span class="tab-dot" style="background:#8e24aa;"></span>숙박
+    </button>
+    <button class="tab" data-theme="가볼만한곳" onclick="selectTheme(this, '가볼만한곳')">
+      <span class="tab-dot" style="background:#039be5;"></span>가볼만한곳
+    </button>
   </div>
 
   <div class="view-toggle">
@@ -181,14 +185,25 @@
   <div class="modal-overlay" id="addModal" onclick="closeAddModal(event)">
     <div class="modal">
       <div class="modal-handle"></div>
-      <h2 class="modal-title" id="addModalTitle">새 장소 추가</h2>
+      <div class="modal-title-row">
+        <h2 class="modal-title" id="addModalTitle">새 장소 추가</h2>
+        <button class="modal-close-btn" onclick="closeModal('addModal')">✕</button>
+      </div>
       <div class="form-group">
         <label class="form-label">테마 선택</label>
         <div class="theme-grid">
-          <div class="theme-option" data-theme="맛집" onclick="selectThemeOption(this)">🍽️ 맛집</div>
-          <div class="theme-option" data-theme="애견동반맛집" onclick="selectThemeOption(this)">🐾 애견동반맛집</div>
-          <div class="theme-option" data-theme="숙박" onclick="selectThemeOption(this)">🏨 숙박</div>
-          <div class="theme-option" data-theme="가볼만한곳" onclick="selectThemeOption(this)">📍 가볼만한곳</div>
+          <div class="theme-option" data-theme="맛집" onclick="selectThemeOption(this)">
+            <span class="theme-dot" style="background:#e53935"></span>맛집
+          </div>
+          <div class="theme-option" data-theme="애견동반맛집" onclick="selectThemeOption(this)">
+            <span class="theme-dot" style="background:#f9a825"></span>애견동반맛집
+          </div>
+          <div class="theme-option" data-theme="숙박" onclick="selectThemeOption(this)">
+            <span class="theme-dot" style="background:#8e24aa"></span>숙박
+          </div>
+          <div class="theme-option" data-theme="가볼만한곳" onclick="selectThemeOption(this)">
+            <span class="theme-dot" style="background:#039be5"></span>가볼만한곳
+          </div>
         </div>
       </div>
       <div class="form-group">
@@ -218,7 +233,7 @@
       </div>
       <div class="form-group">
         <label class="form-label">별점</label>
-        <div class="star-input" id="starInput">
+        <div class="star-input">
           <button class="star-btn" onclick="setStar(1)">★</button>
           <button class="star-btn" onclick="setStar(2)">★</button>
           <button class="star-btn" onclick="setStar(3)">★</button>
@@ -276,9 +291,7 @@
     let currentDetailPlace = null;
     let editingId = null;
     let selectedIds = new Set();
-    let isSelectAll = false;
 
-    // 카카오 지도 동적 로드
     function loadKakaoMap() {
       return new Promise((resolve) => {
         const script = document.createElement('script');
@@ -300,17 +313,22 @@
         center: new kakao.maps.LatLng(37.5665, 126.9780),
         level: 7
       });
-      // 지도 클릭으로 장소 추가
+
+      // 지도 클릭 → 장소 추가 (인포윈도우 열려있으면 닫기만)
       kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
-        if (openInfoWindow) { openInfoWindow.setMap(null); openInfoWindow = null; return; }
+        if (openInfoWindow) {
+          openInfoWindow.setMap(null);
+          openInfoWindow = null;
+          return;
+        }
         const lat = mouseEvent.latLng.getLat();
         const lng = mouseEvent.latLng.getLng();
         openAddModalFromMap(lat, lng);
       });
+
       loadPlaces();
     }
 
-    // 지도 클릭으로 장소 추가 (주소 역지오코딩)
     function openAddModalFromMap(lat, lng) {
       const geocoder = new kakao.maps.services.Geocoder();
       geocoder.coord2Address(lng, lat, function(result, status) {
@@ -353,12 +371,12 @@
       });
     }
 
-    // 마커 SVG 생성 (네이버 즐겨찾기 스타일)
-    function makeMarkerSVG(themeColor, starColor) {
-      return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">
-        <ellipse cx="16" cy="38" rx="6" ry="2.5" fill="rgba(0,0,0,0.18)"/>
-        <circle cx="16" cy="16" r="15" fill="${themeColor}" stroke="white" stroke-width="2"/>
-        <text x="16" y="21" text-anchor="middle" font-size="14" fill="${starColor}">★</text>
+    // 마커: 색상 동그라미 (별 없이)
+    function makeMarkerSVG(themeColor) {
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
+        <ellipse cx="14" cy="34" rx="5" ry="2" fill="rgba(0,0,0,0.18)"/>
+        <circle cx="14" cy="14" r="13" fill="${themeColor}" stroke="white" stroke-width="2.5"/>
+        <circle cx="14" cy="14" r="5" fill="rgba(255,255,255,0.5)"/>
       </svg>`;
     }
 
@@ -369,13 +387,11 @@
 
       places.forEach(place => {
         if (!place.lat || !place.lng) return;
-        const userCfg = getUserConfig(place.user_email || '');
         const themeCfg = THEMES[place.theme] || { color: '#aaa', emoji: '📍', label: place.theme };
 
-        const svgContent = makeMarkerSVG(themeCfg.color, userCfg.starColor);
         const markerDiv = document.createElement('div');
-        markerDiv.style.cssText = 'cursor:pointer;width:32px;height:40px;';
-        markerDiv.innerHTML = svgContent;
+        markerDiv.style.cssText = 'cursor:pointer;width:28px;height:36px;';
+        markerDiv.innerHTML = makeMarkerSVG(themeCfg.color);
 
         const markerPosition = new kakao.maps.LatLng(place.lat, place.lng);
         const customOverlay = new kakao.maps.CustomOverlay({
@@ -390,7 +406,7 @@
         infoDiv.className = 'map-info-popup';
         infoDiv.innerHTML = `
           <div class="map-info-popup-name">${place.name}</div>
-          <span class="map-info-popup-theme" style="background:${themeCfg.color}">${themeCfg.emoji} ${themeCfg.label}</span>
+          <span class="map-info-popup-theme" style="background:${themeCfg.color}">${themeCfg.label}</span>
           <div class="map-info-popup-addr">${place.address || ''}</div>
           <button class="map-info-popup-btn" onclick="showDetail('${place.id}')">상세보기 / 수정</button>`;
 
@@ -429,7 +445,7 @@
           <div class="card-body" onclick="showDetail('${p.id}')">
             <div class="card-header">
               <div class="card-title">${p.name}</div>
-              <div class="card-theme-badge" style="background:${themeCfg.color}">${themeCfg.emoji} ${themeCfg.label}</div>
+              <div class="card-theme-badge" style="background:${themeCfg.color}">${themeCfg.label}</div>
             </div>
             <div class="card-address">📍 ${p.address || ''}</div>
             <div class="card-meta">
@@ -453,7 +469,6 @@
       ).join('');
     }
 
-    // 체크박스 선택
     function toggleSelect(id) {
       if (selectedIds.has(id)) selectedIds.delete(id);
       else selectedIds.add(id);
@@ -465,10 +480,8 @@
       const filtered = filterPlaces();
       if (selectedIds.size === filtered.length) {
         selectedIds.clear();
-        isSelectAll = false;
       } else {
         filtered.forEach(p => selectedIds.add(p.id));
-        isSelectAll = true;
       }
       updateDeleteBtn();
       renderList(filtered);
@@ -489,13 +502,11 @@
     async function deleteSelected() {
       if (selectedIds.size === 0) return;
       if (!confirm(`선택한 ${selectedIds.size}개 장소를 삭제할까요?`)) return;
-      const ids = [...selectedIds];
-      const { error } = await supabase.from('TreasureMap').delete().in('id', ids);
+      const { error } = await supabase.from('TreasureMap').delete().in('id', [...selectedIds]);
       if (!error) { selectedIds.clear(); loadPlaces(); }
       else alert('삭제 실패: ' + error.message);
     }
 
-    // 상세보기
     function showDetail(id) {
       const place = allPlaces.find(p => p.id === id);
       if (!place) return;
@@ -510,7 +521,7 @@
       document.getElementById('detailReview').textContent = place.review || '후기가 없습니다.';
       document.getElementById('detailMeta').innerHTML = `
         ${place.region ? `<span class="card-region">${place.region}</span>` : ''}
-        <span class="card-theme-badge" style="background:${themeCfg.color};color:white;font-size:11px;padding:3px 8px;border-radius:10px">${themeCfg.emoji} ${themeCfg.label}</span>
+        <span class="card-theme-badge" style="background:${themeCfg.color};color:white;font-size:11px;padding:3px 8px;border-radius:10px">${themeCfg.label}</span>
         ${place.memo ? `<span class="card-region">📝 ${place.memo}</span>` : ''}`;
       document.getElementById('detailUser').innerHTML = `
         <span style="background:${userCfg.color};width:10px;height:10px;border-radius:50%;display:inline-block"></span>
@@ -525,7 +536,6 @@
       if (e.target === document.getElementById('detailModal')) document.getElementById('detailModal').classList.remove('show');
     }
 
-    // 수정
     function editPlace() {
       if (!currentDetailPlace) return;
       closeModal('detailModal');
@@ -541,9 +551,7 @@
       document.getElementById('placeMemo').value = p.memo || '';
       selectedThemeOption = p.theme || '';
       selectedStar = p.rating || 0;
-      document.querySelectorAll('.theme-option').forEach(b => {
-        b.classList.toggle('selected', b.dataset.theme === p.theme);
-      });
+      document.querySelectorAll('.theme-option').forEach(b => b.classList.toggle('selected', b.dataset.theme === p.theme));
       document.querySelectorAll('.star-btn').forEach((b, i) => b.classList.toggle('active', i < selectedStar));
       document.getElementById('addModal').classList.add('show');
     }
@@ -560,7 +568,6 @@
       window.open(`https://map.kakao.com/link/search/${query}`, '_blank');
     }
 
-    // 장소 추가/수정 폼
     function resetAddModal() {
       editingId = null;
       selectedStar = 0;
@@ -577,10 +584,13 @@
       document.getElementById('addModal').classList.add('show');
     }
 
-    function closeAddModal(e) { if (e.target === document.getElementById('addModal')) closeModal('addModal'); }
+    function closeAddModal(e) {
+      if (e.target === document.getElementById('addModal')) closeModal('addModal');
+    }
+
     function closeModal(id) {
       document.getElementById(id).classList.remove('show');
-      if (id === 'addModal') { editingId = null; }
+      if (id === 'addModal') editingId = null;
     }
 
     function selectThemeOption(el) {
@@ -619,10 +629,11 @@
       if (!address) { alert('주소를 검색해주세요'); return; }
       if (!region) { alert('지역을 선택해주세요'); return; }
 
+      const lat = parseFloat(document.getElementById('placeLat').value) || null;
+      const lng = parseFloat(document.getElementById('placeLng').value) || null;
+
       const payload = {
-        name, address, theme: selectedThemeOption, region,
-        lat: parseFloat(document.getElementById('placeLat').value) || null,
-        lng: parseFloat(document.getElementById('placeLng').value) || null,
+        name, address, theme: selectedThemeOption, region, lat, lng,
         rating: selectedStar || null,
         review: document.getElementById('placeReview').value.trim() || null,
         memo: document.getElementById('placeMemo').value.trim() || null,
@@ -637,8 +648,17 @@
         }));
       }
       if (error) { alert('저장 실패: ' + error.message); return; }
+
       closeModal('addModal');
-      loadPlaces();
+      await loadPlaces();
+
+      // 저장 후 해당 위치로 지도 이동
+      if (lat && lng) {
+        switchView('map');
+        const moveLatLng = new kakao.maps.LatLng(lat, lng);
+        map.setCenter(moveLatLng);
+        map.setLevel(4);
+      }
     }
 
     function switchView(view) {
@@ -652,7 +672,8 @@
     function selectTheme(el, theme) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       el.classList.add('active');
-      currentTheme = theme; currentRegion = '전체';
+      currentTheme = theme;
+      currentRegion = '전체';
       renderAll();
     }
 
