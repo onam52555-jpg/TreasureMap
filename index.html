@@ -331,17 +331,39 @@
 
     function openAddModalFromMap(lat, lng) {
       const geocoder = new kakao.maps.services.Geocoder();
+      // 1단계: 좌표 → 주소 변환
       geocoder.coord2Address(lng, lat, function(result, status) {
         if (status === kakao.maps.services.Status.OK) {
           const addr = result[0].road_address
             ? result[0].road_address.address_name
             : result[0].address.address_name;
+
           resetAddModal();
           document.getElementById('placeAddr').value = addr;
           document.getElementById('placeLat').value = lat;
           document.getElementById('placeLng').value = lng;
           document.getElementById('addModalTitle').textContent = '새 장소 추가';
-          document.getElementById('addModal').classList.add('show');
+
+          // 2단계: 주변 장소명 검색 (가장 가까운 장소 이름 자동입력)
+          const places = new kakao.maps.services.Places();
+          places.keywordSearch(addr, function(placeResult, placeStatus) {
+            if (placeStatus === kakao.maps.services.Status.OK && placeResult.length > 0) {
+              // 클릭 위치와 가장 가까운 장소 찾기
+              let closest = placeResult[0];
+              let minDist = Infinity;
+              placeResult.forEach(p => {
+                const dy = p.y - lat;
+                const dx = p.x - lng;
+                const dist = Math.sqrt(dy*dy + dx*dx);
+                if (dist < minDist) { minDist = dist; closest = p; }
+              });
+              // 충분히 가까운 경우만 이름 자동입력 (약 100m 이내)
+              if (minDist < 0.001) {
+                document.getElementById('placeName').value = closest.place_name;
+              }
+            }
+            document.getElementById('addModal').classList.add('show');
+          }, { location: new kakao.maps.LatLng(lat, lng), radius: 100 });
         }
       });
     }
