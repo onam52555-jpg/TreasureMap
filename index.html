@@ -260,6 +260,9 @@
   <div class="modal-overlay" id="detailModal" onclick="closeDetailModal(event)">
     <div class="modal">
       <div class="modal-handle"></div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:4px;">
+        <button class="modal-close-btn" onclick="closeModal('detailModal')">✕</button>
+      </div>
       <div class="detail-theme-bar" id="detailThemeBar"></div>
       <h2 class="detail-name" id="detailName"></h2>
       <p class="detail-address" id="detailAddress"></p>
@@ -426,11 +429,24 @@
 
         const infoDiv = document.createElement('div');
         infoDiv.className = 'map-info-popup';
-        infoDiv.innerHTML = `
-          <div class="map-info-popup-name">${place.name}</div>
-          <span class="map-info-popup-theme" style="background:${themeCfg.color}">${themeCfg.label}</span>
-          <div class="map-info-popup-addr">${place.address || ''}</div>
-          <button class="map-info-popup-btn" onclick="showDetail('${place.id}')">상세보기 / 수정</button>`;
+        const nameEl = document.createElement('div');
+        nameEl.className = 'map-info-popup-name';
+        nameEl.textContent = place.name;
+        const themeEl = document.createElement('span');
+        themeEl.className = 'map-info-popup-theme';
+        themeEl.style.background = themeCfg.color;
+        themeEl.textContent = themeCfg.label;
+        const addrEl = document.createElement('div');
+        addrEl.className = 'map-info-popup-addr';
+        addrEl.textContent = place.address || '';
+        const infoBtn = document.createElement('button');
+        infoBtn.className = 'map-info-popup-btn';
+        infoBtn.textContent = '상세보기 / 수정';
+        infoBtn.onclick = (e) => { e.stopPropagation(); showDetail(place.id); };
+        infoDiv.appendChild(nameEl);
+        infoDiv.appendChild(themeEl);
+        infoDiv.appendChild(addrEl);
+        infoDiv.appendChild(infoBtn);
 
         const infoOverlay = new kakao.maps.CustomOverlay({
           position: markerPosition,
