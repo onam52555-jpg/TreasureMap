@@ -139,6 +139,16 @@
     .visit-toggle-btn.active-want { background: #fff0f0; color: #e53935; font-weight: 700; }
     .visit-toggle-btn.active-done { background: #f0fff0; color: #43a047; font-weight: 700; }
 
+    /* 검색창 */
+    .search-bar { background: white; padding: 8px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; display: none; }
+    .search-bar.show { display: block; }
+    .search-input-wrap { display: flex; align-items: center; gap: 8px; background: #f5f5f5; border-radius: 20px; padding: 8px 14px; }
+    .search-input { flex: 1; border: none; background: none; font-size: 14px; font-family: 'Noto Sans KR', sans-serif; outline: none; color: var(--text); }
+    .search-input::placeholder { color: #bbb; }
+    .search-clear { background: none; border: none; color: #aaa; font-size: 16px; cursor: pointer; padding: 0; line-height: 1; display: none; }
+    .search-clear.show { display: block; }
+    .search-result-count { font-size: 12px; color: #888; margin-top: 6px; padding: 0 4px; }
+
     @media (min-width: 600px) {
       .modal { border-radius: 24px; margin: 20px; max-height: 85vh; }
       .modal-overlay { align-items: center; }
@@ -157,6 +167,7 @@
         <div class="user-dot" id="userDot"></div>
         <span id="userName"></span>
       </div>
+      <button class="btn-icon" onclick="toggleSearch()" title="검색">🔍</button>
       <button class="btn-icon" onclick="handleLogout()" title="로그아웃">🚪</button>
     </div>
   </header>
@@ -188,6 +199,17 @@
     <button class="visit-btn active-all" id="visitBtnAll" onclick="selectVisit('all')">전체</button>
     <button class="visit-btn" id="visitBtnWant" onclick="selectVisit('want')">🤍 가고싶은곳</button>
     <button class="visit-btn" id="visitBtnDone" onclick="selectVisit('done')">❤️ 다녀온곳</button>
+  </div>
+
+  <div class="search-bar" id="searchBar">
+    <div class="search-input-wrap">
+      <span style="font-size:14px;color:#bbb">🔍</span>
+      <input type="text" class="search-input" id="searchInput"
+        placeholder="장소명으로 검색..."
+        oninput="onSearchInput(this.value)" />
+      <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+    </div>
+    <div class="search-result-count" id="searchResultCount"></div>
   </div>
 
   <div class="content">
@@ -330,6 +352,7 @@
     let currentTheme = '전체';
     let currentVisit = 'all';
     let selectedVisited = false;
+    let searchQuery = '';
     let currentRegion = '전체';
     let currentView = 'map';
     let allPlaces = [];
@@ -436,6 +459,15 @@
       renderMarkers(filtered);
       renderList(filtered);
       renderRegionFilter();
+      // 검색 중이면 결과 카운트 표시
+      const countEl = document.getElementById('searchResultCount');
+      if (countEl) {
+        if (searchQuery) {
+          countEl.textContent = `검색 결과 ${filtered.length}개`;
+        } else {
+          countEl.textContent = '';
+        }
+      }
     }
 
     function filterPlaces() {
@@ -445,7 +477,10 @@
         const visitOk = currentVisit === 'all' ||
           (currentVisit === 'want' && !p.visited) ||
           (currentVisit === 'done' && p.visited);
-        return themeOk && regionOk && visitOk;
+        const searchOk = !searchQuery ||
+          (p.name && p.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          (p.address && p.address.toLowerCase().includes(searchQuery.toLowerCase()));
+        return themeOk && regionOk && visitOk && searchOk;
       });
     }
 
@@ -856,6 +891,34 @@
         if (idx !== -1) allPlaces[idx].visited = val;
         renderAll();
       }
+    }
+
+    function toggleSearch() {
+      const bar = document.getElementById('searchBar');
+      const isShowing = bar.classList.toggle('show');
+      if (isShowing) {
+        setTimeout(() => document.getElementById('searchInput').focus(), 100);
+      } else {
+        clearSearch();
+      }
+    }
+
+    function onSearchInput(val) {
+      searchQuery = val.trim();
+      const clearBtn = document.getElementById('searchClear');
+      if (clearBtn) clearBtn.classList.toggle('show', searchQuery.length > 0);
+      renderAll();
+    }
+
+    function clearSearch() {
+      searchQuery = '';
+      const input = document.getElementById('searchInput');
+      if (input) input.value = '';
+      const clearBtn = document.getElementById('searchClear');
+      if (clearBtn) clearBtn.classList.remove('show');
+      const countEl = document.getElementById('searchResultCount');
+      if (countEl) countEl.textContent = '';
+      renderAll();
     }
 
     async function handleLogout() {
