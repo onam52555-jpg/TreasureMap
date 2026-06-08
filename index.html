@@ -113,8 +113,13 @@
     .empty-state .emoji { font-size: 48px; margin-bottom: 12px; }
     .empty-state p { font-size: 15px; }
 
-    .map-info-popup { background: white; border-radius: 12px; padding: 12px 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); min-width: 180px; max-width: 240px; }
-    .map-info-popup-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .map-info-popup-wrap { position: relative; }
+    .map-info-popup { background: white; border-radius: 12px; padding: 12px 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); min-width: 190px; max-width: 250px; }
+    .map-info-popup-close { position: absolute; top: 6px; right: 6px; background: none; border: none; font-size: 16px; color: #aaa; cursor: pointer; line-height: 1; padding: 2px 6px; border-radius: 6px; }
+    .map-info-popup-close:hover { background: #f0f0f0; color: #555; }
+    .map-info-popup-name-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .map-info-popup-heart { font-size: 18px; cursor: pointer; line-height: 1; border: none; background: none; padding: 0; flex-shrink: 0; }
+    .map-info-popup-name { font-size: 14px; font-weight: 700; flex: 1; }
     .map-info-popup-theme { font-size: 11px; color: white; padding: 2px 7px; border-radius: 8px; display: inline-block; margin-bottom: 4px; }
     .map-info-popup-addr { font-size: 12px; color: #888; margin-bottom: 8px; }
     .map-info-popup-btn { width: 100%; padding: 8px; border: none; border-radius: 8px; background: linear-gradient(135deg, #a8d5a2, #c3a8e0); color: white; font-size: 13px; font-weight: 600; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
@@ -477,14 +482,21 @@
 
         // 인포윈도우: 버튼 클릭을 window 전역 함수로 처리 (카카오 CustomOverlay 이벤트 우회)
         const placeId = place.id;
+        const heartIcon = place.visited ? '❤️' : '🤍';
         const infoContainer = document.createElement('div');
         infoContainer.style.cssText = 'position:relative;';
         infoContainer.innerHTML = `
-          <div class="map-info-popup">
-            <div class="map-info-popup-name">${place.name}</div>
-            <span class="map-info-popup-theme" style="background:${themeCfg.color}">${themeCfg.label}</span>
-            <div class="map-info-popup-addr">${place.address || ''}</div>
-            <button class="map-info-popup-btn" id="info-btn-${placeId}">상세보기 / 수정</button>
+          <div class="map-info-popup-wrap">
+            <button class="map-info-popup-close" id="info-close-${placeId}">✕</button>
+            <div class="map-info-popup">
+              <div class="map-info-popup-name-row">
+                <button class="map-info-popup-heart" id="info-heart-${placeId}">${heartIcon}</button>
+                <div class="map-info-popup-name">${place.name}</div>
+              </div>
+              <span class="map-info-popup-theme" style="background:${themeCfg.color}">${themeCfg.label}</span>
+              <div class="map-info-popup-addr">${place.address || ''}</div>
+              <button class="map-info-popup-btn" id="info-btn-${placeId}">상세보기 / 수정</button>
+            </div>
           </div>`;
 
         const infoOverlay = new kakao.maps.CustomOverlay({
@@ -496,7 +508,9 @@
 
         // overlay가 map에 붙은 후 버튼에 이벤트 등록
         infoOverlay._placeId = placeId;
+        infoOverlay._place = place;
         infoOverlay._attachBtn = function() {
+          // 상세보기 버튼
           const btn = document.getElementById('info-btn-' + this._placeId);
           if (btn && !btn._bound) {
             btn._bound = true;
@@ -504,6 +518,37 @@
               e.stopPropagation();
               markerClickBlocked = true;
               showDetail(this._placeId);
+            });
+          }
+          // X 닫기 버튼
+          const closeBtn = document.getElementById('info-close-' + this._placeId);
+          if (closeBtn && !closeBtn._bound) {
+            closeBtn._bound = true;
+            closeBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              markerClickBlocked = true;
+              this.setMap(null);
+              openInfoWindow = null;
+            });
+          }
+          // 하트 버튼
+          const heartBtn = document.getElementById('info-heart-' + this._placeId);
+          if (heartBtn && !heartBtn._bound) {
+            heartBtn._bound = true;
+            heartBtn.addEventListener('click', async (e) => {
+              e.stopPropagation();
+              markerClickBlocked = true;
+              const newVal = !this._place.visited;
+              const { error } = await supabase.from('TreasureMap')
+                .update({ visited: newVal })
+                .eq('id', this._placeId);
+              if (!error) {
+                this._place.visited = newVal;
+                heartBtn.textContent = newVal ? '❤️' : '🤍';
+                const idx = allPlaces.findIndex(p => p.id === this._placeId);
+                if (idx !== -1) allPlaces[idx].visited = newVal;
+                renderAll();
+              }
             });
           }
         };
