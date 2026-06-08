@@ -545,9 +545,12 @@
               if (!error) {
                 this._place.visited = newVal;
                 heartBtn.textContent = newVal ? '❤️' : '🤍';
+                // allPlaces 배열만 업데이트 (팝업 유지, 마커 재렌더 없음)
                 const idx = allPlaces.findIndex(p => p.id === this._placeId);
                 if (idx !== -1) allPlaces[idx].visited = newVal;
-                renderAll();
+                // 목록만 조용히 업데이트
+                renderList(filterPlaces());
+                renderRegionFilter();
               }
             });
           }
