@@ -119,6 +119,21 @@
     .map-info-popup-addr { font-size: 12px; color: #888; margin-bottom: 8px; }
     .map-info-popup-btn { width: 100%; padding: 8px; border: none; border-radius: 8px; background: linear-gradient(135deg, #a8d5a2, #c3a8e0); color: white; font-size: 13px; font-weight: 600; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
 
+    /* 방문여부 필터 */
+    .visit-filter { background: white; display: flex; padding: 6px 12px; gap: 6px; border-bottom: 1px solid var(--border); flex-shrink: 0; align-items: center; }
+    .visit-btn { flex: none; padding: 5px 14px; border: 1.5px solid var(--border); border-radius: 20px; background: white; font-size: 13px; font-family: 'Noto Sans KR', sans-serif; color: var(--text-light); cursor: pointer; transition: all 0.15s; }
+    .visit-btn.active-all { color: white; font-weight: 600; background: #888; border-color: #888; }
+    .visit-btn.active-want { color: white; font-weight: 600; background: #e53935; border-color: #e53935; }
+    .visit-btn.active-done { color: white; font-weight: 600; background: #43a047; border-color: #43a047; }
+
+    /* 토글 버튼 */
+    .visit-toggle-wrap { display: flex; align-items: center; gap: 10px; padding: 14px 0 4px; }
+    .visit-toggle-label { font-size: 13px; font-weight: 600; color: #555; }
+    .visit-toggle { display: flex; border-radius: 20px; overflow: hidden; border: 1.5px solid var(--border); }
+    .visit-toggle-btn { padding: 8px 18px; border: none; background: white; font-size: 13px; font-family: 'Noto Sans KR', sans-serif; color: var(--text-light); cursor: pointer; transition: all 0.15s; }
+    .visit-toggle-btn.active-want { background: #fff0f0; color: #e53935; font-weight: 700; }
+    .visit-toggle-btn.active-done { background: #f0fff0; color: #43a047; font-weight: 700; }
+
     @media (min-width: 600px) {
       .modal { border-radius: 24px; margin: 20px; max-height: 85vh; }
       .modal-overlay { align-items: center; }
@@ -162,6 +177,12 @@
   <div class="view-toggle">
     <button class="view-btn active" id="btnMapView" onclick="switchView('map')">🗺️ 지도</button>
     <button class="view-btn" id="btnListView" onclick="switchView('list')">📋 목록</button>
+  </div>
+
+  <div class="visit-filter">
+    <button class="visit-btn active-all" id="visitBtnAll" onclick="selectVisit('all')">전체</button>
+    <button class="visit-btn" id="visitBtnWant" onclick="selectVisit('want')">🤍 가고싶은곳</button>
+    <button class="visit-btn" id="visitBtnDone" onclick="selectVisit('done')">❤️ 다녀온곳</button>
   </div>
 
   <div class="content">
@@ -232,6 +253,16 @@
         </select>
       </div>
       <div class="form-group">
+        <div class="visit-toggle-wrap">
+          <span class="visit-toggle-label">방문여부</span>
+          <div class="visit-toggle">
+            <button class="visit-toggle-btn active-want" id="toggleWant" onclick="setVisited(false)">🤍 가고싶은곳</button>
+            <button class="visit-toggle-btn" id="toggleDone" onclick="setVisited(true)">❤️ 다녀온곳</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
         <label class="form-label">별점</label>
         <div class="star-input">
           <button class="star-btn" onclick="setStar(1)">★</button>
@@ -270,6 +301,13 @@
       <div class="detail-stars" id="detailStars"></div>
       <div class="detail-review" id="detailReview"></div>
       <div class="detail-user" id="detailUser"></div>
+      <div class="visit-toggle-wrap" id="detailVisitWrap">
+        <span class="visit-toggle-label">방문여부</span>
+        <div class="visit-toggle">
+          <button class="visit-toggle-btn" id="detailToggleWant" onclick="setDetailVisited(false)">🤍 가고싶은곳</button>
+          <button class="visit-toggle-btn" id="detailToggleDone" onclick="setDetailVisited(true)">❤️ 다녀온곳</button>
+        </div>
+      </div>
       <div class="detail-actions">
         <button class="btn-delete" id="detailDeleteBtn" onclick="deletePlace()">🗑️ 삭제</button>
         <button class="btn-edit" id="detailEditBtn" onclick="editPlace()">✏️ 수정</button>
@@ -285,6 +323,8 @@
     let map, markers = [];
     let markerClickBlocked = false;
     let currentTheme = '전체';
+    let currentVisit = 'all';
+    let selectedVisited = false;
     let currentRegion = '전체';
     let currentView = 'map';
     let allPlaces = [];
@@ -397,7 +437,10 @@
       return allPlaces.filter(p => {
         const themeOk = currentTheme === '전체' || p.theme === currentTheme;
         const regionOk = currentRegion === '전체' || p.region === currentRegion;
-        return themeOk && regionOk;
+        const visitOk = currentVisit === 'all' ||
+          (currentVisit === 'want' && !p.visited) ||
+          (currentVisit === 'done' && p.visited);
+        return themeOk && regionOk && visitOk;
       });
     }
 
@@ -575,9 +618,14 @@
       document.getElementById('detailUser').innerHTML = `
         <span style="background:${userCfg.color};width:10px;height:10px;border-radius:50%;display:inline-block"></span>
         <span>${userCfg.name}이 저장한 장소</span>`;
-      const isOwner = place.user_id === currentUser.id;
-      document.getElementById('detailDeleteBtn').style.display = isOwner ? 'block' : 'none';
-      document.getElementById('detailEditBtn').style.display = isOwner ? 'block' : 'none';
+      // 모두 수정/삭제/방문여부 변경 가능
+      document.getElementById('detailDeleteBtn').style.display = 'block';
+      document.getElementById('detailEditBtn').style.display = 'block';
+      // 방문여부 토글 상태 반영
+      document.getElementById('detailToggleWant').className = 'visit-toggle-btn' + (!place.visited ? ' active-want' : '');
+      document.getElementById('detailToggleDone').className = 'visit-toggle-btn' + (place.visited ? ' active-done' : '');
+      document.getElementById('detailVisitWrap').style.opacity = '1';
+      document.getElementById('detailVisitWrap').style.pointerEvents = 'auto';
       document.getElementById('detailModal').classList.add('show');
     }
 
@@ -602,6 +650,7 @@
       selectedStar = p.rating || 0;
       document.querySelectorAll('.theme-option').forEach(b => b.classList.toggle('selected', b.dataset.theme === p.theme));
       document.querySelectorAll('.star-btn').forEach((b, i) => b.classList.toggle('active', i < selectedStar));
+      setVisited(p.visited || false);
       document.getElementById('addModal').classList.add('show');
     }
 
@@ -621,10 +670,12 @@
       editingId = null;
       selectedStar = 0;
       selectedThemeOption = '';
+      selectedVisited = false;
       ['placeName','placeAddr','placeLat','placeLng','placeReview','placeMemo'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('placeRegion').value = '';
       document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.theme-option').forEach(b => b.classList.remove('selected'));
+      setVisited(false);
     }
 
     function openAddModal() {
@@ -651,6 +702,12 @@
     function setStar(n) {
       selectedStar = n;
       document.querySelectorAll('.star-btn').forEach((b, i) => b.classList.toggle('active', i < n));
+    }
+
+    function setVisited(val) {
+      selectedVisited = val;
+      document.getElementById('toggleWant').className = 'visit-toggle-btn' + (!val ? ' active-want' : '');
+      document.getElementById('toggleDone').className = 'visit-toggle-btn' + (val ? ' active-done' : '');
     }
 
     function searchAddress() {
@@ -686,6 +743,7 @@
         rating: selectedStar || null,
         review: document.getElementById('placeReview').value.trim() || null,
         memo: document.getElementById('placeMemo').value.trim() || null,
+        visited: selectedVisited,
       };
 
       let error;
@@ -727,6 +785,30 @@
     }
 
     function selectRegion(region) { currentRegion = region; renderAll(); }
+
+    function selectVisit(v) {
+      currentVisit = v;
+      document.getElementById('visitBtnAll').className = 'visit-btn' + (v === 'all' ? ' active-all' : '');
+      document.getElementById('visitBtnWant').className = 'visit-btn' + (v === 'want' ? ' active-want' : '');
+      document.getElementById('visitBtnDone').className = 'visit-btn' + (v === 'done' ? ' active-done' : '');
+      renderAll();
+    }
+
+    async function setDetailVisited(val) {
+      if (!currentDetailPlace) return;
+      const { error } = await supabase.from('TreasureMap')
+        .update({ visited: val })
+        .eq('id', currentDetailPlace.id);
+      if (!error) {
+        currentDetailPlace.visited = val;
+        document.getElementById('detailToggleWant').className = 'visit-toggle-btn' + (!val ? ' active-want' : '');
+        document.getElementById('detailToggleDone').className = 'visit-toggle-btn' + (val ? ' active-done' : '');
+        // allPlaces 배열도 업데이트
+        const idx = allPlaces.findIndex(p => p.id === currentDetailPlace.id);
+        if (idx !== -1) allPlaces[idx].visited = val;
+        renderAll();
+      }
+    }
 
     async function handleLogout() {
       if (confirm('로그아웃 하시겠어요?')) {
