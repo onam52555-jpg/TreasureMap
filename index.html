@@ -283,6 +283,7 @@
   <script src="app.js"></script>
   <script>
     let map, markers = [];
+    let markerClickBlocked = false;
     let currentTheme = '전체';
     let currentRegion = '전체';
     let currentView = 'map';
@@ -317,8 +318,12 @@
         level: 5
       });
 
-      // 지도 클릭 → 장소 추가 (인포윈도우 열려있으면 닫기만)
+      // 지도 클릭 → 장소 추가 (마커 클릭이면 무시)
       kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+        if (markerClickBlocked) {
+          markerClickBlocked = false;
+          return;
+        }
         if (openInfoWindow) {
           openInfoWindow.setMap(null);
           openInfoWindow = null;
@@ -427,36 +432,45 @@
         });
         customOverlay.setMap(map);
 
-        const infoDiv = document.createElement('div');
-        infoDiv.className = 'map-info-popup';
-        infoDiv.innerHTML = `
-          <div class="map-info-popup-name">${place.name}</div>
-          <span class="map-info-popup-theme" style="background:${themeCfg.color}">${themeCfg.label}</span>
-          <div class="map-info-popup-addr">${place.address || ''}</div>
-          <button class="map-info-popup-btn" data-place-id="${place.id}">상세보기 / 수정</button>`;
+        // 인포윈도우: 버튼 클릭을 window 전역 함수로 처리 (카카오 CustomOverlay 이벤트 우회)
+        const placeId = place.id;
+        const infoContainer = document.createElement('div');
+        infoContainer.style.cssText = 'position:relative;';
+        infoContainer.innerHTML = `
+          <div class="map-info-popup">
+            <div class="map-info-popup-name">${place.name}</div>
+            <span class="map-info-popup-theme" style="background:${themeCfg.color}">${themeCfg.label}</span>
+            <div class="map-info-popup-addr">${place.address || ''}</div>
+            <button class="map-info-popup-btn" id="info-btn-${placeId}">상세보기 / 수정</button>
+          </div>`;
 
         const infoOverlay = new kakao.maps.CustomOverlay({
           position: markerPosition,
-          content: infoDiv,
+          content: infoContainer,
           yAnchor: 1.5,
           zIndex: 10
         });
 
-        // 버튼 클릭 이벤트: overlay가 지도에 올라간 후 DOM에서 직접 처리
-        infoDiv.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const btn = e.target.closest('.map-info-popup-btn');
-          if (btn) {
-            const placeId = btn.dataset.placeId;
-            if (placeId) showDetail(placeId);
+        // overlay가 map에 붙은 후 버튼에 이벤트 등록
+        infoOverlay._placeId = placeId;
+        infoOverlay._attachBtn = function() {
+          const btn = document.getElementById('info-btn-' + this._placeId);
+          if (btn && !btn._bound) {
+            btn._bound = true;
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              markerClickBlocked = true;
+              showDetail(this._placeId);
+            });
           }
-        });
+        };
 
         markerDiv.onclick = (e) => {
-          e.stopPropagation();
+          markerClickBlocked = true;
           if (openInfoWindow) { openInfoWindow.setMap(null); openInfoWindow = null; }
           infoOverlay.setMap(map);
           openInfoWindow = infoOverlay;
+          setTimeout(() => infoOverlay._attachBtn(), 50);
         };
 
         markers.push({ overlay: customOverlay, info: infoOverlay, place });
