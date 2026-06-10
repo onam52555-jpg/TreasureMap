@@ -140,7 +140,7 @@
     .visit-toggle-btn.active-done { background: #f0fff0; color: #43a047; font-weight: 700; }
 
     /* 검색창 */
-    .search-bar { background: white; padding: 8px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; display: none; }
+    .search-bar { background: white; padding: 8px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; display: none; position: relative; }
     .search-bar.show { display: block; }
     .search-input-wrap { display: flex; align-items: center; gap: 8px; background: #f5f5f5; border-radius: 20px; padding: 8px 14px; }
     .search-input { flex: 1; border: none; background: none; font-size: 14px; font-family: 'Noto Sans KR', sans-serif; outline: none; color: var(--text); }
@@ -148,6 +148,15 @@
     .search-clear { background: none; border: none; color: #aaa; font-size: 16px; cursor: pointer; padding: 0; line-height: 1; display: none; }
     .search-clear.show { display: block; }
     .search-result-count { font-size: 12px; color: #888; margin-top: 6px; padding: 0 4px; }
+    /* 지도 검색 드롭다운 */
+    .map-search-dropdown { position: absolute; left: 12px; right: 12px; top: 100%; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); z-index: 500; max-height: 240px; overflow-y: auto; display: none; }
+    .map-search-dropdown.show { display: block; }
+    .map-search-item { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f5f5f5; }
+    .map-search-item:last-child { border-bottom: none; }
+    .map-search-item:hover { background: #f9fdf9; }
+    .map-search-item-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .map-search-item-addr { font-size: 12px; color: #888; }
+    .map-search-empty { padding: 16px; text-align: center; color: #aaa; font-size: 13px; }
 
     @media (min-width: 600px) {
       .modal { border-radius: 24px; margin: 20px; max-height: 85vh; }
@@ -205,11 +214,13 @@
     <div class="search-input-wrap">
       <span style="font-size:14px;color:#bbb">🔍</span>
       <input type="text" class="search-input" id="searchInput"
-        placeholder="장소명으로 검색..."
-        oninput="onSearchInput(this.value)" />
+        placeholder="장소 검색..."
+        oninput="onSearchInput(this.value)"
+        autocomplete="off" />
       <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
     </div>
     <div class="search-result-count" id="searchResultCount"></div>
+    <div class="map-search-dropdown" id="mapSearchDropdown"></div>
   </div>
 
   <div class="content">
@@ -857,6 +868,10 @@
       document.getElementById('btnListView').classList.toggle('active', view === 'list');
       document.getElementById('map').style.display = view === 'map' ? 'block' : 'none';
       document.getElementById('listView').classList.toggle('show', view === 'list');
+      // 뷰 전환시 검색 초기화 + placeholder 변경
+      clearSearch();
+      const input = document.getElementById('searchInput');
+      if (input) input.placeholder = view === 'map' ? '장소명이나 주소 검색...' : '저장된 장소 검색...';
     }
 
     function selectTheme(el, theme) {
@@ -897,17 +912,77 @@
       const bar = document.getElementById('searchBar');
       const isShowing = bar.classList.toggle('show');
       if (isShowing) {
+        // placeholder를 현재 뷰에 맞게 변경
+        const input = document.getElementById('searchInput');
+        if (input) {
+          input.placeholder = currentView === 'map' ? '장소명이나 주소 검색...' : '저장된 장소 검색...';
+        }
         setTimeout(() => document.getElementById('searchInput').focus(), 100);
       } else {
         clearSearch();
       }
     }
 
+    let mapSearchTimer = null;
+
     function onSearchInput(val) {
-      searchQuery = val.trim();
+      const query = val.trim();
+      searchQuery = query;
       const clearBtn = document.getElementById('searchClear');
-      if (clearBtn) clearBtn.classList.toggle('show', searchQuery.length > 0);
-      renderAll();
+      if (clearBtn) clearBtn.classList.toggle('show', query.length > 0);
+
+      if (currentView === 'map') {
+        // 지도 탭: 카카오 장소 검색
+        const dropdown = document.getElementById('mapSearchDropdown');
+        if (!query) {
+          dropdown.classList.remove('show');
+          dropdown.innerHTML = '';
+          return;
+        }
+        // 디바운스 (0.4초 후 검색)
+        clearTimeout(mapSearchTimer);
+        mapSearchTimer = setTimeout(() => {
+          searchKakaoPlaces(query);
+        }, 400);
+      } else {
+        // 목록 탭: 저장된 장소 필터링
+        renderAll();
+      }
+    }
+
+    function searchKakaoPlaces(query) {
+      const dropdown = document.getElementById('mapSearchDropdown');
+      dropdown.innerHTML = '<div class="map-search-empty">검색 중...</div>';
+      dropdown.classList.add('show');
+
+      const ps = new kakao.maps.services.Places();
+      ps.keywordSearch(query, function(result, status) {
+        if (status === kakao.maps.services.Status.OK && result.length > 0) {
+          dropdown.innerHTML = result.slice(0, 8).map((p, i) =>
+            `<div class="map-search-item" data-idx="${i}">
+              <div class="map-search-item-name">${p.place_name}</div>
+              <div class="map-search-item-addr">${p.road_address_name || p.address_name}</div>
+            </div>`
+          ).join('');
+
+          // 각 항목 클릭 이벤트
+          dropdown.querySelectorAll('.map-search-item').forEach((el, i) => {
+            el.addEventListener('click', () => {
+              const place = result[i];
+              const lat = parseFloat(place.y);
+              const lng = parseFloat(place.x);
+              // 지도 이동
+              map.setCenter(new kakao.maps.LatLng(lat, lng));
+              map.setLevel(3);
+              // 검색창 닫기
+              dropdown.classList.remove('show');
+              document.getElementById('searchInput').value = place.place_name;
+            });
+          });
+        } else {
+          dropdown.innerHTML = '<div class="map-search-empty">검색 결과가 없어요</div>';
+        }
+      });
     }
 
     function clearSearch() {
@@ -918,7 +993,9 @@
       if (clearBtn) clearBtn.classList.remove('show');
       const countEl = document.getElementById('searchResultCount');
       if (countEl) countEl.textContent = '';
-      renderAll();
+      const dropdown = document.getElementById('mapSearchDropdown');
+      if (dropdown) { dropdown.classList.remove('show'); dropdown.innerHTML = ''; }
+      if (currentView === 'list') renderAll();
     }
 
     async function handleLogout() {
