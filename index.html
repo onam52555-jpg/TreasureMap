@@ -1157,6 +1157,32 @@
     }
 
     init();
+
+    // ESC 키로 모든 팝업 닫기
+    document.addEventListener('keydown', function(e) {
+      if (e.key !== 'Escape') return;
+      // 사진 전체보기
+      if (document.getElementById('photoViewer').classList.contains('show')) {
+        closePhotoViewer(); return;
+      }
+      // 상세보기 모달
+      if (document.getElementById('detailModal').classList.contains('show')) {
+        closeModal('detailModal'); return;
+      }
+      // 추가/수정 모달
+      if (document.getElementById('addModal').classList.contains('show')) {
+        closeModal('addModal'); return;
+      }
+      // 지도 인포윈도우
+      if (openInfoWindow) {
+        openInfoWindow.setMap(null); openInfoWindow = null; return;
+      }
+      // 검색창
+      if (document.getElementById('searchBar').classList.contains('show')) {
+        document.getElementById('searchBar').classList.remove('show');
+        clearSearch(); return;
+      }
+    });
   </script>
 </body>
 </html>
