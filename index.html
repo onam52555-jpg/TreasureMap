@@ -158,6 +158,29 @@
     .map-search-item-addr { font-size: 12px; color: #888; }
     .map-search-empty { padding: 16px; text-align: center; color: #aaa; font-size: 13px; }
 
+    /* 사진 업로드 */
+    .photo-section { margin-bottom: 16px; }
+    .photo-upload-area { border: 2px dashed var(--border); border-radius: 12px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.15s; background: #fafafa; }
+    .photo-upload-area:hover { border-color: #a8d5a2; background: #f0faf0; }
+    .photo-upload-area input { display: none; }
+    .photo-upload-text { font-size: 13px; color: #aaa; margin-top: 6px; }
+    .photo-preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+    .photo-preview-item { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; }
+    .photo-preview-item img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-preview-delete { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.55); border: none; color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+    .photo-uploading { font-size: 12px; color: #a8d5a2; margin-top: 6px; }
+    /* 상세보기 사진 */
+    .detail-photos { margin-bottom: 16px; }
+    .detail-photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .detail-photo-item { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; cursor: pointer; }
+    .detail-photo-item img { width: 100%; height: 100%; object-fit: cover; }
+    .detail-photo-delete { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.55); border: none; color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    /* 사진 전체보기 */
+    .photo-viewer { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; }
+    .photo-viewer.show { display: flex; }
+    .photo-viewer img { max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
+    .photo-viewer-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: white; font-size: 28px; cursor: pointer; }
+
     @media (min-width: 600px) {
       .modal { border-radius: 24px; margin: 20px; max-height: 85vh; }
       .modal-overlay { align-items: center; }
@@ -318,6 +341,17 @@
         <label class="form-label">메모 <span style="color:#aaa;font-weight:400">(선택)</span></label>
         <input type="text" class="form-input" id="placeMemo" placeholder="예: 주차 편함, 예약 필수" />
       </div>
+      <div class="form-group photo-section">
+        <label class="form-label">사진 <span style="color:#aaa;font-weight:400">(선택, 최대 5장)</span></label>
+        <div class="photo-upload-area" onclick="document.getElementById('photoFileInput').click()">
+          <input type="file" id="photoFileInput" accept="image/*" multiple onchange="handlePhotoUpload(this.files)" />
+          <div style="font-size:28px">📷</div>
+          <div class="photo-upload-text">사진을 추가하려면 여기를 눌러주세요</div>
+        </div>
+        <div class="photo-uploading" id="photoUploading" style="display:none">업로드 중...</div>
+        <div class="photo-preview-grid" id="photoPreviewGrid"></div>
+      </div>
+
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal('addModal')">취소</button>
         <button class="btn-save" onclick="savePlace()">저장하기</button>
@@ -337,6 +371,7 @@
       <p class="detail-address" id="detailAddress"></p>
       <div class="detail-meta" id="detailMeta"></div>
       <div class="detail-stars" id="detailStars"></div>
+      <div class="detail-photos" id="detailPhotos"></div>
       <div class="detail-review" id="detailReview"></div>
       <div class="detail-user" id="detailUser"></div>
       <div class="visit-toggle-wrap" id="detailVisitWrap">
@@ -354,6 +389,12 @@
     </div>
   </div>
 
+  <!-- 사진 전체보기 -->
+  <div class="photo-viewer" id="photoViewer" onclick="closePhotoViewer()">
+    <button class="photo-viewer-close" onclick="closePhotoViewer()">✕</button>
+    <img id="photoViewerImg" src="" alt="" />
+  </div>
+
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
@@ -364,6 +405,7 @@
     let currentVisit = 'all';
     let selectedVisited = false;
     let searchQuery = '';
+    let pendingPhotos = [];  // 업로드 대기 중인 사진 URL 배열
     let currentRegion = '전체';
     let currentView = 'map';
     let allPlaces = [];
@@ -702,6 +744,8 @@
       const stars = place.rating ? '★'.repeat(place.rating) + '☆'.repeat(5 - place.rating) : '별점 없음';
       document.getElementById('detailThemeBar').style.background = themeCfg.color;
       document.getElementById('detailName').textContent = place.name;
+      // 사진 렌더링
+      renderDetailPhotos(place);
       document.getElementById('detailAddress').textContent = '📍 ' + (place.address || '');
       document.getElementById('detailStars').textContent = stars;
       document.getElementById('detailReview').textContent = place.review || '후기가 없습니다.';
@@ -745,6 +789,9 @@
       document.querySelectorAll('.theme-option').forEach(b => b.classList.toggle('selected', b.dataset.theme === p.theme));
       document.querySelectorAll('.star-btn').forEach((b, i) => b.classList.toggle('active', i < selectedStar));
       setVisited(p.visited || false);
+      // 기존 사진 미리보기
+      pendingPhotos = p.photos ? JSON.parse(p.photos) : [];
+      renderPhotoPreview();
       document.getElementById('addModal').classList.add('show');
     }
 
@@ -765,8 +812,11 @@
       selectedStar = 0;
       selectedThemeOption = '';
       selectedVisited = false;
+      pendingPhotos = [];
       ['placeName','placeAddr','placeLat','placeLng','placeReview','placeMemo'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('placeRegion').value = '';
+      document.getElementById('photoPreviewGrid').innerHTML = '';
+      document.getElementById('photoFileInput').value = '';
       document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.theme-option').forEach(b => b.classList.remove('selected'));
       setVisited(false);
@@ -838,6 +888,7 @@
         review: document.getElementById('placeReview').value.trim() || null,
         memo: document.getElementById('placeMemo').value.trim() || null,
         visited: selectedVisited,
+        photos: pendingPhotos.length > 0 ? JSON.stringify(pendingPhotos) : null,
       };
 
       let error;
@@ -996,6 +1047,106 @@
       const dropdown = document.getElementById('mapSearchDropdown');
       if (dropdown) { dropdown.classList.remove('show'); dropdown.innerHTML = ''; }
       if (currentView === 'list') renderAll();
+    }
+
+    // ── 사진 업로드 함수들 ──
+
+    async function handlePhotoUpload(files) {
+      if (!files || files.length === 0) return;
+      const maxPhotos = 5;
+      const remaining = maxPhotos - pendingPhotos.length;
+      if (remaining <= 0) { alert('사진은 최대 5장까지 올릴 수 있어요'); return; }
+
+      const uploadEl = document.getElementById('photoUploading');
+      uploadEl.style.display = 'block';
+
+      const filesToUpload = Array.from(files).slice(0, remaining);
+      for (const file of filesToUpload) {
+        const ext = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substr(2,9)}.${ext}`;
+        const { data, error } = await supabase.storage
+          .from('place-photos')
+          .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+        if (!error) {
+          const { data: urlData } = supabase.storage
+            .from('place-photos')
+            .getPublicUrl(fileName);
+          pendingPhotos.push(urlData.publicUrl);
+        }
+      }
+
+      uploadEl.style.display = 'none';
+      document.getElementById('photoFileInput').value = '';
+      renderPhotoPreview();
+    }
+
+    function renderPhotoPreview() {
+      const grid = document.getElementById('photoPreviewGrid');
+      if (!grid) return;
+      grid.innerHTML = pendingPhotos.map((url, i) => `
+        <div class="photo-preview-item">
+          <img src="${url}" alt="사진${i+1}" />
+          <button class="photo-preview-delete" onclick="deletePreviewPhoto(${i})">✕</button>
+        </div>`).join('');
+    }
+
+    async function deletePreviewPhoto(idx) {
+      const url = pendingPhotos[idx];
+      // Storage에서도 삭제
+      const fileName = url.split('/').pop();
+      await supabase.storage.from('place-photos').remove([fileName]);
+      pendingPhotos.splice(idx, 1);
+      renderPhotoPreview();
+    }
+
+    function renderDetailPhotos(place) {
+      const container = document.getElementById('detailPhotos');
+      if (!container) return;
+      if (!place.photos) { container.innerHTML = ''; return; }
+      const photos = JSON.parse(place.photos);
+      if (photos.length === 0) { container.innerHTML = ''; return; }
+      const isOwner = true; // 모두 삭제 가능
+      container.innerHTML = `
+        <div class="detail-photo-grid">
+          ${photos.map((url, i) => `
+            <div class="detail-photo-item">
+              <img src="${url}" alt="사진${i+1}" onclick="openPhotoViewer('${url}')" />
+              ${isOwner ? `<button class="detail-photo-delete" onclick="deleteDetailPhoto('${place.id}', ${i}, event)">✕</button>` : ''}
+            </div>`).join('')}
+        </div>`;
+    }
+
+    async function deleteDetailPhoto(placeId, idx, e) {
+      e.stopPropagation();
+      if (!confirm('이 사진을 삭제할까요?')) return;
+      const place = allPlaces.find(p => p.id === placeId);
+      if (!place || !place.photos) return;
+      const photos = JSON.parse(place.photos);
+      const url = photos[idx];
+      const fileName = url.split('/').pop();
+      // Storage에서 삭제
+      await supabase.storage.from('place-photos').remove([fileName]);
+      photos.splice(idx, 1);
+      const newPhotos = photos.length > 0 ? JSON.stringify(photos) : null;
+      const { error } = await supabase.from('TreasureMap')
+        .update({ photos: newPhotos })
+        .eq('id', placeId);
+      if (!error) {
+        place.photos = newPhotos;
+        currentDetailPlace.photos = newPhotos;
+        renderDetailPhotos(place);
+      }
+    }
+
+    function openPhotoViewer(url) {
+      document.getElementById('photoViewerImg').src = url;
+      document.getElementById('photoViewer').classList.add('show');
+    }
+
+    function closePhotoViewer() {
+      document.getElementById('photoViewer').classList.remove('show');
+      document.getElementById('photoViewerImg').src = '';
     }
 
     async function handleLogout() {
