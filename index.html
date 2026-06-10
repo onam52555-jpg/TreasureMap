@@ -181,6 +181,24 @@
     .photo-viewer img { max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
     .photo-viewer-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: white; font-size: 28px; cursor: pointer; }
 
+    /* 사진 뷰어 슬라이드 */
+    .photo-viewer { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000; display: none; align-items: center; justify-content: center; flex-direction: column; }
+    .photo-viewer.show { display: flex; }
+    .photo-viewer-main { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; }
+    .photo-viewer img { max-width: 90vw; max-height: 80vh; border-radius: 8px; object-fit: contain; user-select: none; }
+    .photo-viewer-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: white; font-size: 28px; cursor: pointer; z-index: 10; }
+    .photo-viewer-prev, .photo-viewer-next { background: rgba(255,255,255,0.15); border: none; color: white; font-size: 24px; cursor: pointer; padding: 12px 16px; border-radius: 50%; position: absolute; top: 50%; transform: translateY(-50%); transition: background 0.15s; }
+    .photo-viewer-prev { left: 12px; }
+    .photo-viewer-next { right: 12px; }
+    .photo-viewer-prev:hover, .photo-viewer-next:hover { background: rgba(255,255,255,0.3); }
+    .photo-viewer-dots { display: flex; gap: 6px; margin-top: 14px; }
+    .photo-viewer-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: background 0.15s; }
+    .photo-viewer-dot.active { background: white; }
+
+    /* 저장완료 토스트 */
+    .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(30,30,30,0.92); color: white; padding: 12px 24px; border-radius: 20px; font-size: 14px; font-family: 'Noto Sans KR', sans-serif; z-index: 2000; opacity: 0; transition: all 0.25s; pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
     @media (min-width: 600px) {
       .modal { border-radius: 24px; margin: 20px; max-height: 85vh; }
       .modal-overlay { align-items: center; }
@@ -389,11 +407,19 @@
     </div>
   </div>
 
-  <!-- 사진 전체보기 -->
-  <div class="photo-viewer" id="photoViewer" onclick="closePhotoViewer()">
+  <!-- 사진 전체보기 슬라이드 -->
+  <div class="photo-viewer" id="photoViewer" onclick="onViewerBgClick(event)">
     <button class="photo-viewer-close" onclick="closePhotoViewer()">✕</button>
-    <img id="photoViewerImg" src="" alt="" />
+    <div class="photo-viewer-main">
+      <button class="photo-viewer-prev" id="viewerPrev" onclick="slideViewer(-1)">‹</button>
+      <img id="photoViewerImg" src="" alt="" />
+      <button class="photo-viewer-next" id="viewerNext" onclick="slideViewer(1)">›</button>
+    </div>
+    <div class="photo-viewer-dots" id="viewerDots"></div>
   </div>
+
+  <!-- 저장완료 토스트 -->
+  <div class="toast" id="saveToast">✅ 저장되었습니다</div>
 
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -406,6 +432,8 @@
     let selectedVisited = false;
     let searchQuery = '';
     let pendingPhotos = [];  // 업로드 대기 중인 사진 URL 배열
+    let viewerPhotos = [];
+    let viewerIndex = 0;
     let currentRegion = '전체';
     let currentView = 'map';
     let allPlaces = [];
@@ -904,13 +932,14 @@
       closeModal('addModal');
       await loadPlaces();
 
-      // 저장 후 해당 위치로 지도 이동
-      if (lat && lng) {
-        switchView('map');
+      // 저장 후 처리: 지도 탭이면 해당 위치로 이동, 목록 탭이면 그대로 유지
+      if (lat && lng && currentView === 'map') {
         const moveLatLng = new kakao.maps.LatLng(lat, lng);
         map.setCenter(moveLatLng);
         map.setLevel(4);
       }
+
+      showToast();
     }
 
     function switchView(view) {
@@ -1111,7 +1140,7 @@
         <div class="detail-photo-grid">
           ${photos.map((url, i) => `
             <div class="detail-photo-item">
-              <img src="${url}" alt="사진${i+1}" onclick="openPhotoViewer('${url}')" />
+              <img src="${url}" alt="사진${i+1}" onclick="openPhotoViewer('${url}', ${JSON.stringify(photos)})" />
               ${isOwner ? `<button class="detail-photo-delete" onclick="deleteDetailPhoto('${place.id}', ${i}, event)">✕</button>` : ''}
             </div>`).join('')}
         </div>`;
@@ -1139,14 +1168,52 @@
       }
     }
 
-    function openPhotoViewer(url) {
-      document.getElementById('photoViewerImg').src = url;
+    function openPhotoViewer(url, photos) {
+      viewerPhotos = photos || [url];
+      viewerIndex = viewerPhotos.indexOf(url);
+      if (viewerIndex < 0) viewerIndex = 0;
+      updateViewer();
       document.getElementById('photoViewer').classList.add('show');
+    }
+
+    function updateViewer() {
+      document.getElementById('photoViewerImg').src = viewerPhotos[viewerIndex];
+      // 이전/다음 버튼
+      document.getElementById('viewerPrev').style.display = viewerPhotos.length > 1 ? 'block' : 'none';
+      document.getElementById('viewerNext').style.display = viewerPhotos.length > 1 ? 'block' : 'none';
+      // 점 인디케이터
+      const dots = document.getElementById('viewerDots');
+      dots.innerHTML = viewerPhotos.map((_, i) =>
+        `<div class="photo-viewer-dot ${i === viewerIndex ? 'active' : ''}" onclick="goViewer(${i})"></div>`
+      ).join('');
+    }
+
+    function slideViewer(dir) {
+      viewerIndex = (viewerIndex + dir + viewerPhotos.length) % viewerPhotos.length;
+      updateViewer();
+    }
+
+    function goViewer(idx) {
+      viewerIndex = idx;
+      updateViewer();
+    }
+
+    function onViewerBgClick(e) {
+      if (e.target === document.getElementById('photoViewer')) closePhotoViewer();
     }
 
     function closePhotoViewer() {
       document.getElementById('photoViewer').classList.remove('show');
       document.getElementById('photoViewerImg').src = '';
+    }
+
+    // 토스트 메시지
+    let toastTimer = null;
+    function showToast() {
+      const toast = document.getElementById('saveToast');
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
     }
 
     async function handleLogout() {
@@ -1159,8 +1226,20 @@
     init();
 
     // ESC 키로 모든 팝업 닫기
+    // 뷰어 터치 슬라이드 (모바일)
+    let touchStartX = 0;
+    document.getElementById('photoViewer').addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].clientX;
+    });
+    document.getElementById('photoViewer').addEventListener('touchend', e => {
+      const diff = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 50) slideViewer(diff > 0 ? 1 : -1);
+    });
+
     document.addEventListener('keydown', function(e) {
       if (e.key !== 'Escape') return;
+      // 토스트
+      document.getElementById('saveToast').classList.remove('show');
       // 사진 전체보기
       if (document.getElementById('photoViewer').classList.contains('show')) {
         closePhotoViewer(); return;
@@ -1182,6 +1261,13 @@
         document.getElementById('searchBar').classList.remove('show');
         clearSearch(); return;
       }
+    });
+
+    // 뷰어에서 키보드 화살표로 슬라이드
+    document.addEventListener('keydown', function(e) {
+      if (!document.getElementById('photoViewer').classList.contains('show')) return;
+      if (e.key === 'ArrowLeft') slideViewer(-1);
+      if (e.key === 'ArrowRight') slideViewer(1);
     });
   </script>
 </body>
