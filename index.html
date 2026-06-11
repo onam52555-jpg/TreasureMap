@@ -1133,17 +1133,36 @@
       const container = document.getElementById('detailPhotos');
       if (!container) return;
       if (!place.photos) { container.innerHTML = ''; return; }
-      const photos = JSON.parse(place.photos);
-      if (photos.length === 0) { container.innerHTML = ''; return; }
-      const isOwner = true; // 모두 삭제 가능
+      let photos;
+      try { photos = JSON.parse(place.photos); } catch(e) { container.innerHTML = ''; return; }
+      if (!photos || photos.length === 0) { container.innerHTML = ''; return; }
+
       container.innerHTML = `
         <div class="detail-photo-grid">
           ${photos.map((url, i) => `
             <div class="detail-photo-item">
-              <img src="${url}" alt="사진${i+1}" onclick="openPhotoViewer('${url}', ${JSON.stringify(photos)})" />
-              ${isOwner ? `<button class="detail-photo-delete" onclick="deleteDetailPhoto('${place.id}', ${i}, event)">✕</button>` : ''}
+              <img src="${url}" alt="사진${i+1}" data-index="${i}" data-placeid="${place.id}" class="detail-photo-img" />
+              <button class="detail-photo-delete" data-idx="${i}" data-placeid="${place.id}">✕</button>
             </div>`).join('')}
         </div>`;
+
+      // 사진 클릭 이벤트 - DOM에서 직접 등록
+      container.querySelectorAll('.detail-photo-img').forEach(img => {
+        img.addEventListener('click', () => {
+          const idx = parseInt(img.dataset.index);
+          openPhotoViewer(photos[idx], photos);
+        });
+      });
+
+      // 삭제 버튼 이벤트
+      container.querySelectorAll('.detail-photo-delete').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = parseInt(btn.dataset.idx);
+          const placeId = btn.dataset.placeid;
+          deleteDetailPhoto(placeId, idx, e);
+        });
+      });
     }
 
     async function deleteDetailPhoto(placeId, idx, e) {
