@@ -1270,44 +1270,43 @@
     }
 
     // 카카오 공유
-    function initKakao() {
-      if (window.Kakao && !Kakao.isInitialized()) {
-        Kakao.init(KAKAO_MAP_KEY);
-      }
-    }
-
     function shareKakao() {
       if (!currentDetailPlace) return;
-      initKakao();
-      if (!window.Kakao || !Kakao.isInitialized()) {
-        alert('카카오 공유를 사용할 수 없어요'); return;
-      }
-      const place = currentDetailPlace;
-      const themeCfg = THEMES[place.theme] || { emoji: '📍', label: place.theme };
-      const photos = place.photos ? JSON.parse(place.photos) : [];
-      const imageUrl = photos.length > 0 ? photos[0] : 'https://via.placeholder.com/400x300?text=보물지도';
+      try {
+        if (!window.Kakao) { alert('카카오 SDK 로드 실패'); return; }
+        if (!Kakao.isInitialized()) {
+          Kakao.init('f7da18f5467c98e0e45cdd5bd535596d');
+        }
+        const place = currentDetailPlace;
+        const themeCfg = THEMES[place.theme] || { emoji: '📍', label: place.theme };
+        const photos = place.photos ? JSON.parse(place.photos) : [];
+        const imageUrl = photos.length > 0 ? photos[0] : null;
 
-      Kakao.Share.sendDefault({
-        objectType: 'location',
-        address: place.address || '',
-        addressTitle: place.name,
-        content: {
-          title: `${themeCfg.emoji} ${place.name}`,
-          description: `${place.review || place.memo || place.address || ''}`,
-          imageUrl: imageUrl,
-          link: {
-            mobileWebUrl: `https://onam52555-jpg.github.io/TreasureMap`,
-            webUrl: `https://onam52555-jpg.github.io/TreasureMap`,
+        const shareObj = {
+          objectType: 'feed',
+          content: {
+            title: `${themeCfg.emoji} ${place.name}`,
+            description: `📍 ${place.address || ''}${place.review ? '\n' + place.review : ''}`,
+            link: {
+              mobileWebUrl: 'https://onam52555-jpg.github.io/TreasureMap',
+              webUrl: 'https://onam52555-jpg.github.io/TreasureMap',
+            },
           },
-        },
-        buttons: [{
-          title: '보물지도에서 보기',
-          link: {
-            mobileWebUrl: `https://onam52555-jpg.github.io/TreasureMap`,
-            webUrl: `https://onam52555-jpg.github.io/TreasureMap`,
-          },
-        }],
-      });
+          buttons: [{
+            title: '보물지도에서 보기',
+            link: {
+              mobileWebUrl: 'https://onam52555-jpg.github.io/TreasureMap',
+              webUrl: 'https://onam52555-jpg.github.io/TreasureMap',
+            },
+          }],
+        };
+        if (imageUrl) shareObj.content.imageUrl = imageUrl;
+
+        Kakao.Share.sendDefault(shareObj);
+      } catch(e) {
+        console.error('카카오 공유 오류:', e);
+        alert('카카오 공유 중 오류가 발생했어요: ' + e.message);
+      }
     }
 
     async function handleLogout() {
@@ -1318,6 +1317,13 @@
     }
 
     init();
+
+    // 카카오 SDK 초기화 (페이지 로드시)
+    window.addEventListener('load', function() {
+      if (window.Kakao && !Kakao.isInitialized()) {
+        Kakao.init('f7da18f5467c98e0e45cdd5bd535596d');
+      }
+    });
 
     // ESC 키로 모든 팝업 닫기
     // 뷰어 터치 슬라이드 (모바일)
