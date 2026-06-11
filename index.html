@@ -199,6 +199,16 @@
     .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(30,30,30,0.92); color: white; padding: 12px 24px; border-radius: 20px; font-size: 14px; font-family: 'Noto Sans KR', sans-serif; z-index: 2000; opacity: 0; transition: all 0.25s; pointer-events: none; white-space: nowrap; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+    /* 목록 썸네일 */
+    .card-thumbnail { width: 72px; height: 72px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+    .card-thumbnail-wrap { flex-shrink: 0; }
+
+    /* 방문날짜 */
+    .card-date { font-size: 11px; color: #aaa; display: flex; align-items: center; gap: 3px; }
+
+    /* 카카오톡 공유 버튼 */
+    .btn-kakao-share { flex: 1; padding: 12px; border: none; border-radius: 12px; background: #FEE500; color: #3C1E1E; font-size: 14px; font-weight: 600; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; min-width: 80px; display: flex; align-items: center; justify-content: center; gap: 4px; }
+
     @media (min-width: 600px) {
       .modal { border-radius: 24px; margin: 20px; max-height: 85vh; }
       .modal-overlay { align-items: center; }
@@ -332,6 +342,11 @@
         </select>
       </div>
       <div class="form-group">
+        <label class="form-label">방문 날짜 <span style="color:#aaa;font-weight:400">(선택)</span></label>
+        <input type="date" class="form-input" id="placeVisitDate" />
+      </div>
+
+      <div class="form-group">
         <div class="visit-toggle-wrap">
           <span class="visit-toggle-label">방문여부</span>
           <div class="visit-toggle">
@@ -404,6 +419,12 @@
         <button class="btn-edit" id="detailEditBtn" onclick="editPlace()">✏️ 수정</button>
         <button class="btn-map-go" onclick="goToKakaoMap()">🗺️ 카카오맵</button>
       </div>
+      <div style="margin-top:10px;">
+        <button class="btn-kakao-share" onclick="shareKakao()">
+          <img src="https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_medium.png" style="width:20px;height:20px;" />
+          카카오톡 공유
+        </button>
+      </div>
     </div>
   </div>
 
@@ -422,6 +443,7 @@
   <div class="toast" id="saveToast">✅ 저장되었습니다</div>
 
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+  <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
   <script>
@@ -695,9 +717,13 @@
         const themeCfg = THEMES[p.theme] || { color: '#aaa', emoji: '📍', label: p.theme };
         const stars = p.rating ? '★'.repeat(p.rating) + '☆'.repeat(5 - p.rating) : '';
         const checked = selectedIds.has(p.id) ? 'checked' : '';
+        const thumbPhotos = p.photos ? JSON.parse(p.photos) : [];
+        const thumbUrl = thumbPhotos.length > 0 ? thumbPhotos[0] : null;
+        const visitDateStr = p.visit_date ? `📅 ${p.visit_date}` : '';
         return `<div class="place-card">
           <input type="checkbox" class="card-checkbox" ${checked}
             onclick="event.stopPropagation(); toggleSelect('${p.id}')" />
+          ${thumbUrl ? `<div class="card-thumbnail-wrap"><img class="card-thumbnail" src="${thumbUrl}" alt="썸네일" /></div>` : ''}
           <div class="card-body" onclick="showDetail('${p.id}')">
             <div class="card-header">
               <div class="card-title">${p.name}</div>
@@ -711,6 +737,7 @@
                 <span class="card-user-dot" style="background:${userCfg.color}"></span>
                 ${userCfg.name}
               </span>
+              ${visitDateStr ? `<span class="card-date">${visitDateStr}</span>` : ''}
             </div>
             ${p.review ? `<div class="card-review">${p.review}</div>` : ''}
           </div>
@@ -780,6 +807,7 @@
       document.getElementById('detailMeta').innerHTML = `
         ${place.region ? `<span class="card-region">${place.region}</span>` : ''}
         <span class="card-theme-badge" style="background:${themeCfg.color};color:white;font-size:11px;padding:3px 8px;border-radius:10px">${themeCfg.label}</span>
+        ${place.visit_date ? `<span class="card-region">📅 ${place.visit_date}</span>` : ''}
         ${place.memo ? `<span class="card-region">📝 ${place.memo}</span>` : ''}`;
       document.getElementById('detailUser').innerHTML = `
         <span style="background:${userCfg.color};width:10px;height:10px;border-radius:50%;display:inline-block"></span>
@@ -817,6 +845,7 @@
       document.querySelectorAll('.theme-option').forEach(b => b.classList.toggle('selected', b.dataset.theme === p.theme));
       document.querySelectorAll('.star-btn').forEach((b, i) => b.classList.toggle('active', i < selectedStar));
       setVisited(p.visited || false);
+      document.getElementById('placeVisitDate').value = p.visit_date || '';
       // 기존 사진 미리보기
       pendingPhotos = p.photos ? JSON.parse(p.photos) : [];
       renderPhotoPreview();
@@ -845,6 +874,7 @@
       document.getElementById('placeRegion').value = '';
       document.getElementById('photoPreviewGrid').innerHTML = '';
       document.getElementById('photoFileInput').value = '';
+      document.getElementById('placeVisitDate').value = '';
       document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.theme-option').forEach(b => b.classList.remove('selected'));
       setVisited(false);
@@ -917,6 +947,7 @@
         memo: document.getElementById('placeMemo').value.trim() || null,
         visited: selectedVisited,
         photos: pendingPhotos.length > 0 ? JSON.stringify(pendingPhotos) : null,
+        visit_date: document.getElementById('placeVisitDate').value || null,
       };
 
       let error;
@@ -1236,6 +1267,47 @@
       toast.classList.add('show');
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // 카카오 공유
+    function initKakao() {
+      if (window.Kakao && !Kakao.isInitialized()) {
+        Kakao.init(KAKAO_MAP_KEY);
+      }
+    }
+
+    function shareKakao() {
+      if (!currentDetailPlace) return;
+      initKakao();
+      if (!window.Kakao || !Kakao.isInitialized()) {
+        alert('카카오 공유를 사용할 수 없어요'); return;
+      }
+      const place = currentDetailPlace;
+      const themeCfg = THEMES[place.theme] || { emoji: '📍', label: place.theme };
+      const photos = place.photos ? JSON.parse(place.photos) : [];
+      const imageUrl = photos.length > 0 ? photos[0] : 'https://via.placeholder.com/400x300?text=보물지도';
+
+      Kakao.Share.sendDefault({
+        objectType: 'location',
+        address: place.address || '',
+        addressTitle: place.name,
+        content: {
+          title: `${themeCfg.emoji} ${place.name}`,
+          description: `${place.review || place.memo || place.address || ''}`,
+          imageUrl: imageUrl,
+          link: {
+            mobileWebUrl: `https://onam52555-jpg.github.io/TreasureMap`,
+            webUrl: `https://onam52555-jpg.github.io/TreasureMap`,
+          },
+        },
+        buttons: [{
+          title: '보물지도에서 보기',
+          link: {
+            mobileWebUrl: `https://onam52555-jpg.github.io/TreasureMap`,
+            webUrl: `https://onam52555-jpg.github.io/TreasureMap`,
+          },
+        }],
+      });
     }
 
     async function handleLogout() {
