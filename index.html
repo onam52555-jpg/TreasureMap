@@ -1019,11 +1019,11 @@
           dropdown.innerHTML = '';
           return;
         }
-        // 디바운스 (0.4초 후 검색)
+        // 디바운스 (0.2초 후 검색)
         clearTimeout(mapSearchTimer);
         mapSearchTimer = setTimeout(() => {
           searchKakaoPlaces(query);
-        }, 400);
+        }, 200);
       } else {
         // 목록 탭: 저장된 장소 필터링
         renderAll();
@@ -1035,8 +1035,11 @@
       dropdown.innerHTML = '<div class="map-search-empty">검색 중...</div>';
       dropdown.classList.add('show');
 
+      // 특수문자 제거 후 검색 (& % # 등)
+      const cleanQuery = query.replace(/[&%#@!*]/g, ' ').trim();
+
       const ps = new kakao.maps.services.Places();
-      ps.keywordSearch(query, function(result, status) {
+      ps.keywordSearch(cleanQuery, function(result, status) {
         if (status === kakao.maps.services.Status.OK && result.length > 0) {
           dropdown.innerHTML = result.slice(0, 8).map((p, i) =>
             `<div class="map-search-item" data-idx="${i}">
