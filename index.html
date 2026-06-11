@@ -565,12 +565,12 @@
       });
     }
 
-    // 마커: 색상 동그라미 (별 없이)
+    // 마커: 색상 동그라미 (별 없이) - 크게 만들어 클릭 쉽게
     function makeMarkerSVG(themeColor) {
-      return `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
-        <ellipse cx="14" cy="34" rx="5" ry="2" fill="rgba(0,0,0,0.18)"/>
-        <circle cx="14" cy="14" r="13" fill="${themeColor}" stroke="white" stroke-width="2.5"/>
-        <circle cx="14" cy="14" r="5" fill="rgba(255,255,255,0.5)"/>
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="38" height="48" viewBox="0 0 38 48">
+        <ellipse cx="19" cy="46" rx="7" ry="2.5" fill="rgba(0,0,0,0.18)"/>
+        <circle cx="19" cy="19" r="17" fill="${themeColor}" stroke="white" stroke-width="3"/>
+        <circle cx="19" cy="19" r="7" fill="rgba(255,255,255,0.5)"/>
       </svg>`;
     }
 
@@ -584,7 +584,7 @@
         const themeCfg = THEMES[place.theme] || { color: '#aaa', emoji: '📍', label: place.theme };
 
         const markerDiv = document.createElement('div');
-        markerDiv.style.cssText = 'cursor:pointer;width:28px;height:36px;';
+        markerDiv.style.cssText = 'cursor:pointer;width:38px;height:48px;';
         markerDiv.innerHTML = makeMarkerSVG(themeCfg.color);
 
         const markerPosition = new kakao.maps.LatLng(place.lat, place.lng);
