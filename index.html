@@ -1319,14 +1319,19 @@
 
     async function initWithDeepLink() {
       await init();
-      // URL에 place 파라미터 있으면 상세보기 자동 열기
-      const params = new URLSearchParams(window.location.search);
-      const placeId = params.get('place');
+      // URL 또는 sessionStorage에서 place 파라미터 확인
+      let placeId = new URLSearchParams(window.location.search).get('place');
+      if (!placeId) {
+        // 로그인 후 리다이렉트된 경우 sessionStorage에서 확인
+        const savedUrl = sessionStorage.getItem('redirectAfterLogin');
+        if (savedUrl) {
+          placeId = new URLSearchParams(new URL(savedUrl).search).get('place');
+          sessionStorage.removeItem('redirectAfterLogin');
+        }
+      }
       if (placeId) {
-        // 장소 로드 완료 후 해당 장소 상세보기 열기
         const target = allPlaces.find(p => p.id === placeId);
         if (target) {
-          // 지도를 해당 위치로 이동
           if (target.lat && target.lng) {
             map.setCenter(new kakao.maps.LatLng(target.lat, target.lng));
             map.setLevel(4);

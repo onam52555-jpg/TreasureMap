@@ -160,7 +160,13 @@
         btn.textContent = '로그인';
         btn.classList.remove('loading');
       } else {
-        window.location.href = 'index.html';
+        // 저장된 리다이렉트 URL이 있으면 그쪽으로, 없으면 index.html로
+        const savedUrl = sessionStorage.getItem('redirectAfterLogin');
+        if (savedUrl) {
+          window.location.href = savedUrl;
+        } else {
+          window.location.href = 'index.html';
+        }
       }
     }
 
