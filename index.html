@@ -1282,21 +1282,22 @@
         const photos = place.photos ? JSON.parse(place.photos) : [];
         const imageUrl = photos.length > 0 ? photos[0] : null;
 
+        const placeUrl = `https://onam52555-jpg.github.io/TreasureMap?place=${place.id}`;
         const shareObj = {
           objectType: 'feed',
           content: {
             title: `${themeCfg.emoji} ${place.name}`,
             description: `📍 ${place.address || ''}${place.review ? '\n' + place.review : ''}`,
             link: {
-              mobileWebUrl: 'https://onam52555-jpg.github.io/TreasureMap',
-              webUrl: 'https://onam52555-jpg.github.io/TreasureMap',
+              mobileWebUrl: placeUrl,
+              webUrl: placeUrl,
             },
           },
           buttons: [{
             title: '보물지도에서 보기',
             link: {
-              mobileWebUrl: 'https://onam52555-jpg.github.io/TreasureMap',
-              webUrl: 'https://onam52555-jpg.github.io/TreasureMap',
+              mobileWebUrl: placeUrl,
+              webUrl: placeUrl,
             },
           }],
         };
@@ -1316,7 +1317,25 @@
       }
     }
 
-    init();
+    async function initWithDeepLink() {
+      await init();
+      // URL에 place 파라미터 있으면 상세보기 자동 열기
+      const params = new URLSearchParams(window.location.search);
+      const placeId = params.get('place');
+      if (placeId) {
+        // 장소 로드 완료 후 해당 장소 상세보기 열기
+        const target = allPlaces.find(p => p.id === placeId);
+        if (target) {
+          // 지도를 해당 위치로 이동
+          if (target.lat && target.lng) {
+            map.setCenter(new kakao.maps.LatLng(target.lat, target.lng));
+            map.setLevel(4);
+          }
+          showDetail(placeId);
+        }
+      }
+    }
+    initWithDeepLink();
 
     // 카카오 SDK 초기화 (페이지 로드시)
     window.addEventListener('load', function() {
