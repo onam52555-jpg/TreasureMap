@@ -752,8 +752,10 @@
           ${thumbUrl ? `<div class="card-thumbnail-wrap"><img class="card-thumbnail" src="${thumbUrl}" alt="썸네일" /></div>` : ''}
           <div class="card-body" onclick="showDetail('${p.id}')">
             <div class="card-header">
-              <div class="card-title">${p.name}</div>
-              <div class="card-theme-badge" style="background:${themeCfg.color}">${themeCfg.label}</div>
+              <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0;">
+                <div class="card-theme-badge" style="background:${themeCfg.color};flex-shrink:0">${themeCfg.label}</div>
+                <div class="card-title">${p.name}</div>
+              </div>
             </div>
             <div class="card-address">📍 ${p.address || ''}</div>
             <div class="card-meta">
